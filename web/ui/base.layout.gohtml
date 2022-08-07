@@ -1,0 +1,26 @@
+{{define "base"}}
+  <!doctype html>
+
+  <head>
+    <title>{{template "title" .}}</title>
+    <meta charset="utf-8">
+  </head>
+
+  <body>
+
+    <header>
+      Some header text
+    </header>
+
+    <nav>
+      Some navigation text
+    </nav>
+
+    <main>
+      Text on a page!!!
+      {{template "main" .}}
+    </main>
+  </body>
+
+</html>
+{{ end }}
