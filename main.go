@@ -13,8 +13,8 @@ func main() {
 
 	log.Print("Starting the service...")
 
-	// ПЫтаемся загрузить конфигурацию
-	// Если нет выходим с ошибкой 
+	// Пытаемся загрузить конфигурацию
+	// Если нет выходим с ошибкой
 	log.Print("Trying to load configuration")
 	config, err := config.LoadConfig()
 	if err != nil {
@@ -22,7 +22,7 @@ func main() {
 	}
 
 	// Подключаемся в БД, параметры подключения берем из конфигурации
-	// Если нет выходим с ошибкой 
+	// Если нет выходим с ошибкой
 	log.Print("Trying to connect to database")
 	conn, err := database.ConnectToDB(
 		config.DB_HOST,
@@ -34,12 +34,12 @@ func main() {
 		log.Fatalf("Connecting to DB finish with error : %s", err)
 	}
 
-	// Регистрируем обработчики получаем роутер 
+	// Регистрируем обработчики получаем роутер
 	log.Print("Registrate handlers")
 	router := handlers.Router(conn, config)
 
 	log.Print("The service is ready to listen and serve")
 
-	// Запускаем лиснер 
+	// Запускаем лиснер
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
