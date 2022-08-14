@@ -1,2 +1,4 @@
 runapp_local.sh
 runapp_local.ps1
+/venv/
+/.idea/
