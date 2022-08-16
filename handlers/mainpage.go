@@ -6,14 +6,16 @@ import (
 	"text/template"
 )
 
+// Функция обработчик для главной страницы
 func mainPage(w http.ResponseWriter, r *http.Request) {
 
-	var uiPath = cfg.ROOT_PATH + "/web/ui/"
+	var rootPath = cfg.ROOT_PATH + "/web/ui/"
 
+	// Список файлов для шаблона
 	files := []string{
-		uiPath + "main.page.gohtml",
-		uiPath + "base.layout.gohtml",
-		uiPath + "footer.partial.gohtml",
+		rootPath + "main.page.gohtml",
+		rootPath + "base.layout.gohtml",
+		rootPath + "footer.partial.gohtml",
 	}
 
 	ts, err := template.ParseFiles(files...)

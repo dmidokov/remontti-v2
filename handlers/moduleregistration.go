@@ -8,15 +8,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type RegistrationInfo struct {
+	ModuleName string
+	ModuleLink string
+	Token      string
+}
+
 // Функция не имеет в основе функционала
-// просто проверка 
+// просто проверка
 func registration(router *mux.Router) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		type RegistrationInfo struct {
-			ModuleName string
-			ModuleLink string
-			Token      string
-		}
 
 		var regInfo RegistrationInfo
 

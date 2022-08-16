@@ -1,25 +1,24 @@
-const app = Vue.createApp({
-    data() {
+async function fetchPostRequestWithJsonBody(data) {
+    let response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(data)
+    });
+    if (response.ok) {
         return {
-            currentTab: 'Home',
-            tabs: ['Home', 'Posts', 'Archive']
+            "data": await response.json(),
+            "error": null
         }
-    },
-    computed: {
-        currentTabComponent() {
-            return 'tab-' + this.currentTab.toLowerCase()
+    } else {
+        return {
+            "data": null,
+            'error': {
+                "statusText": response.statusText,
+                "error": response.error,
+                "status": response.status
+            }
         }
     }
-})
-
-app.component('tab-home', {
-    template: `<div class="demo-tab">Home component</div>`
-})
-app.component('tab-posts', {
-    template: `<div class="demo-tab">Posts component</div>`
-})
-app.component('tab-archive', {
-    template: `<div class="demo-tab">Archive component</div>`
-})
-
-app.mount('#dynamic-component-demo')
+}

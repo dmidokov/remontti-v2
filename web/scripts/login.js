@@ -1,0 +1,1 @@
+loginButton.mount('#login-button-block')

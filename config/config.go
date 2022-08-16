@@ -42,6 +42,10 @@ func LoadConfig() (*Configuration, error) {
 		return &Configuration{}, errors.New("application root path is empty")
 	}
 
+	if config.ADMIN_PASSWORD, exist = os.LookupEnv(ADMIN_PASSWORD); !exist {
+		return &Configuration{}, errors.New("admin password is missing")
+	}
+
 	// Возвращаем конфиг если не вышли ранее с ошибкой
 	return &config, nil
 }
