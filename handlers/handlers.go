@@ -4,27 +4,31 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/RemonttiCRM/remontti-v2/config"
+	"github.com/antonlindstrom/pgstore"
+	"github.com/dmidokov/remontti-v2/config"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
-// Переменная уровня пакета, используется для 
+// Переменная уровня пакета, используется для
 // передачи конфигурации в функции обработчики
-// 
-// Возмодно стоит отпраделить структуру под конфиг в текущем пакете
-// и обновить обработчики сдав их методами этой структуры  
 var cfg *config.Configuration
+var conn *sql.DB
+var sessionStore *pgstore.PGStore
 
 // Возвращает *mux.Router, c handlerFunction
 // А также файловые сервер для выдачи статики css/js/jpg/...
-func Router(conn *sql.DB, config *config.Configuration) *mux.Router {
+func Router(con *sql.DB, store *pgstore.PGStore, config *config.Configuration) *mux.Router {
 
 	cfg = config
+	conn = con
+	sessionStore = store
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", mainPage).Methods("GET")
+	router.HandleFunc("/", auth(mainPage)).Methods("GET")
+
+	router.HandleFunc("/login", auth(login)).Methods("GET", "POST")
 
 	router.HandleFunc("/home", home).Methods("GET")
 
@@ -32,8 +36,9 @@ func Router(conn *sql.DB, config *config.Configuration) *mux.Router {
 
 	router.HandleFunc("/dbcheck", dbCheck(conn))
 
-	fileServer := http.FileServer(http.Dir("./static/"))
+	fileServer := http.FileServer(http.Dir("./web/"))
 	router.Handle("/static/{folder}/{file}", http.StripPrefix("/static", fileServer))
+	router.Handle("/favicon.ico", fileServer)
 
 	return router
 }
