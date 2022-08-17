@@ -39,13 +39,19 @@
     export DB_PORT=<database_port>
     export DB_NAME=<database_name>
     export ROOT_PATH=<path_to_root_of_application>
+    export ADMIN_PASSWORD=<crm_admin_password>
+    export SESSION_SECRET=<session_secrec_key>
     ```
+
+    > `ADMIN_PASSWORD` - пароль для пользователя `admin`, <br> `SESSION_SECRET` - секрет которым будут шифроваться данные пользовательской сессии  
 
 4. Для запуска приложения в консоли выполнить команду:
 
     ```bash
     ./runapp_local.sh
     ```
+
+    > Во время запуска приложения, также будут созданы, если не существуют, таблицы требующиеся для работы и пользователь `admin` с паролем указанным в конфигурационном файле
 
 5. В терминале вы должны увидеть лог со статусом запуска приложения.  
 
@@ -88,9 +94,12 @@
     $Env:DB_PORT=<database_port>
     $Env:DB_NAME=<database_name> 
     $Env:ROOT_PATH=<path_to_root_of_application> 
- 
+    $Env:ADMIN_PASSWORD=<crm_admin_password>
+    $Env:SESSION_SECRET=<session_secrec_key>
     go run .\main.go
     ```
+
+    > `ADMIN_PASSWORD` - пароль для пользователя `admin`, <br> `SESSION_SECRET` - секрет которым будут шифроваться данные пользовательской сессии  
 
 4. Для запуска приложения в консоли выполнить команду:
 
@@ -98,14 +107,17 @@
     ./runapp_local.ps1
     ```
 
+    > Во время запуска приложения, также будут созданы, если не существуют, таблицы требующиеся для работы и пользователь `admin` с паролем указанным в конфигурационном файле
+
 5. В терминале вы должны увидеть лог со статусом запуска приложения.  
 
     ```cmd
-    2022/08/07 16:18:49 Starting the service...
-    2022/08/07 16:18:49 Trying to load configuration
-    2022/08/07 16:18:49 Trying to connect to database
-    2022/08/07 16:18:49 Registrate handlers
-    2022/08/07 16:18:49 The service is ready to listen and serve
+    2022/08/17 20:39:56 Starting the service...
+    2022/08/17 20:39:56 Trying to load configuration
+    2022/08/17 20:39:56 Trying to connect to database
+    2022/08/17 20:39:57 Prepare sessions storage
+    2022/08/17 20:39:57 Registrate handlers
+    2022/08/17 20:39:57 The service is ready to listen and serve
     ```
     > **Примечание**: при возникновении ошибок связанных с запуском вы увидите в терминале сообщения об ошибках.
 
