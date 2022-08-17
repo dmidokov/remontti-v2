@@ -1,16 +1,14 @@
 package handlers
 
 import (
-	"bufio"
 	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 	"text/template"
 
 	"github.com/dmidokov/remontti-v2/database"
+	"github.com/dmidokov/remontti-v2/translations"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -31,27 +29,6 @@ type response struct {
 }
 
 var pageData = loginPageData{}
-
-// TODO: Переделать на БД
-// Закешировать
-func getTranslations(t string) (map[string]string, error) {
-
-	var result = make(map[string]string)
-
-	file, err := os.Open(cfg.ROOT_PATH + "/web/ui/translations/ru_RU/loginpage")
-	if err != nil {
-		return nil, err
-	}
-
-	scaner := bufio.NewScanner(file)
-
-	for scaner.Scan() {
-		values := strings.Split(scaner.Text(), "=")
-		result[values[0]] = values[1]
-	}
-
-	return result, nil
-}
 
 // Страница логина
 func login(w http.ResponseWriter, r *http.Request) {
@@ -76,8 +53,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pageData.Title = "Login--"
-		pageData.Translation, err = getTranslations("loginpage")
+		pageData.Title = "Вход"
+		pageData.Translation, err = translations.GetTranslations("loginpage", cfg)
 
 		if err != nil {
 			println(err.Error())
