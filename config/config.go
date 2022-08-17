@@ -46,6 +46,10 @@ func LoadConfig() (*Configuration, error) {
 		return &Configuration{}, errors.New("admin password is missing")
 	}
 
+	if config.SESSIONS_SECRET, exist = os.LookupEnv(SESSION_SECRET); !exist {
+		return &Configuration{}, errors.New("session secrec is empty")
+	}
+
 	// Возвращаем конфиг если не вышли ранее с ошибкой
 	return &config, nil
 }

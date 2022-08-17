@@ -9,15 +9,17 @@ const (
 	DB_NAME        = "DB_NAME"
 	ROOT_PATH      = "ROOT_PATH"
 	ADMIN_PASSWORD = "ADMIN_PASSWORD"
+	SESSION_SECRET = "SESSION_SECRET"
 )
 
 // Структура для хранения конфигруации
 type Configuration struct {
-	DB_USER        string
-	DB_PASSWORD    string
-	DB_HOST        string
-	DB_PORT        string
-	DB_NAME        string
-	ROOT_PATH      string
-	ADMIN_PASSWORD string
+	DB_USER         string
+	DB_PASSWORD     string
+	DB_HOST         string
+	DB_PORT         string
+	DB_NAME         string
+	ROOT_PATH       string
+	ADMIN_PASSWORD  string
+	SESSIONS_SECRET string
 }

@@ -95,7 +95,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 		var v User
 		err := json.NewDecoder(r.Body).Decode(&v)
 
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 
 		if err != nil {
@@ -140,6 +139,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 					Errors: []string{"Invalid password"}})
 				return
 			} else {
+
+				session, _ := sessionStore.Get(r, "session-key")
+				session.Values["authenticated"] = true
+				session.Options.MaxAge = 3600
+				session.Save(r, w)
+				
 				json.NewEncoder(w).Encode(response{
 					Status: "ok",
 					Errors: []string{},

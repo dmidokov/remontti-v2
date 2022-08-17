@@ -5,5 +5,6 @@ $Env:DB_PORT=<db_port>
 $Env:DB_NAME=<db_name> 
 $Env:ROOT_PATH=<path_to_root_of_application>
 $Env:ADMIN_PASSWORD=<crm_admin_password>
- 
+$Env:SESSION_SECRET=<session_secrec_key>
+
 go run .\main.go
