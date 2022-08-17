@@ -16,9 +16,67 @@ header {
   padding: 10px;
   font-size: 1em;
   color: var(--background-text-color);
+  display: flex;
+  justify-content: space-between;
+}
+
+.header-icon {
+  width: 20px;
+  cursor: pointer;
+}
+
+.header-icon:hover {
+  transform: scale(1.2, 1.2);
+}
+
+.left-side-menu > div {
+  display: inline-block;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  padding: 0px;
+  display: none;
+  right: 0px;
+  background-color: var(--modal-background);
+}
+
+.dropdown-menu > li {
+  display: block;
+  white-space: nowrap;
+  color: var(--elem-4);
+  cursor: pointer;
+}
+
+.dropdown-menu > li > a {
+    text-decoration: none;
+    color:inherit;
+    width:100%;
+    padding: 0.5em 0.8em;
+    display: inline-block;
+}
+
+.dropdown-menu > li:hover {
+  background-color: var(--elem-2);
+  color: var(--modal-header-text-color);
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.account-icon:hover > .dropdown-menu {
+  display: block;
+  border: 1px solid black;
+  opacity: 1;
 }
 
 main {
+  min-height: 90vh;
 }
 
 footer {
