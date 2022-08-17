@@ -2,6 +2,7 @@ var loginButton = Vue.createApp({
     data() {
         return {
             counter: 0,
+            message: '',
         };
     },
     methods: {
@@ -14,8 +15,10 @@ var loginButton = Vue.createApp({
             let response = await fetchPostRequestWithJsonBody(user)
 
             if (response.error == null) {
-                console.log("Response data:")
-                console.log(response.data)
+
+                if (response.data.status == "error") {
+                    this.message = response.data.message
+                }
             }
         },
     },

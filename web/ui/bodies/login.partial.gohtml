@@ -5,7 +5,7 @@
             <div class="modal-header">
                 {{ .Translation.LoginFormHeader }}
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="login-form">
                 <div class="modal-line-center">
                     <div>
                         <span>{{ .Translation.LoginFieldHeader }}</span> <br>
@@ -20,8 +20,13 @@
                 </div>
                 <div class="modal-line-center">
                     <div id="login-button-block">
-                        <button type="button" id="login-button" @click="signIn ">{{ .Translation.SignIn}}</button>
-                    </div>
+                        <div >
+                            <button type="button" @click="signIn ">{{ .Translation.SignIn}}</button> 
+                        </div>    
+                        <div class="login-form-error-message">
+                            {{"{{message}}"}}
+                        </div>                  
+                    </div> 
                 </div>
             </div>
         </div>

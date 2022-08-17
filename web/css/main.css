@@ -62,14 +62,13 @@ footer {
 
 .modal-line-center {
   text-align: center;
-  display: flexbox;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
 
 .modal-line-center > div {
-  display: inline-block;
-  text-align: left;
+  text-align: center;
+  position: relative;
 }
 
 .modal-line-center > button {
@@ -89,6 +88,18 @@ button {
   font-size: 1em;
   color: #000;
   border: 1px solid var(--background-text-color);
+}
+
+.login-form-error-message {
+  color: var(--icon-3);
+  margin-top: 1em;
+  padding-bottom: -0.5em;
+  font-size: 1em;
+  min-height: 1.1em;
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, 0px);
 }
 
 /* MEDIA TAGS */
