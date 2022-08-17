@@ -122,14 +122,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 					json.NewEncoder(w).Encode(response{
 						Status:  "error",
 						Message: pageData.Translation["UserIsNotExists"],
-						Errors: []string{"User is not exists"}})
+						Errors:  []string{"User is not exists"}})
 					return
 				}
 				log.Printf("Error scaning user password from DB response with error: %s", err)
 				json.NewEncoder(w).Encode(response{
-					Status: "error",
+					Status:  "error",
 					Message: pageData.Translation["ErrorTryAgain"],
-					Errors: []string{"Internal server error"}})
+					Errors:  []string{"Internal server error"}})
 				return
 			}
 
@@ -138,9 +138,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Printf("Invalid password: %s", err)
 				json.NewEncoder(w).Encode(response{
-					Status: "error",
+					Status:  "error",
 					Message: pageData.Translation["InvalidUserOrPassword"],
-					Errors: []string{"Invalid password"}})
+					Errors:  []string{"Invalid password"}})
 				return
 			} else {
 
@@ -153,16 +153,26 @@ func login(w http.ResponseWriter, r *http.Request) {
 					Status: "ok",
 					Errors: []string{},
 				})
+
 				return
 			}
 
 		} else {
 			log.Printf("Login or password is empty")
 			json.NewEncoder(w).Encode(response{
-				Status: "error",
+				Status:  "error",
 				Message: pageData.Translation["EmptyLoginOrPassword"],
-				Errors: []string{"Login or password is empty"}})
+				Errors:  []string{"Login or password is empty"}})
 			return
 		}
 	}
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	session, _ := sessionStore.Get(r, "session-key")
+	session.Values["authenticated"] = false
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

@@ -29,6 +29,7 @@ func Router(con *sql.DB, store *sessions.CookieStore, config *config.Configurati
 	router.HandleFunc("/", auth(mainPage)).Methods("GET")
 
 	router.HandleFunc("/login", auth(login)).Methods("GET", "POST")
+	router.HandleFunc("/logout", auth(logout) ).Methods("GET")
 
 	router.HandleFunc("/home", home).Methods("GET")
 

@@ -18,6 +18,8 @@ var loginButton = Vue.createApp({
 
                 if (response.data.status == "error") {
                     this.message = response.data.message
+                } else {
+                    window.location.href="/"
                 }
             }
         },
