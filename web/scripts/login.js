@@ -1,1 +1,1 @@
-loginButton.mount('#login-button-block')
+loginButton.mount('#login-form')

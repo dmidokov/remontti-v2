@@ -100,8 +100,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Invalid data: %s", err)
 			json.NewEncoder(w).Encode(response{
-				Status: "error",
-				Errors: []string{"Invalid data"}})
+				Status:  "error",
+				Message: pageData.Translation["InvalidData"],
+				Errors:  []string{"Invalid data"}})
 			return
 		}
 
@@ -119,13 +120,15 @@ func login(w http.ResponseWriter, r *http.Request) {
 				if err == sql.ErrNoRows {
 					log.Printf("User is not exists with error: %s", err)
 					json.NewEncoder(w).Encode(response{
-						Status: "error",
+						Status:  "error",
+						Message: pageData.Translation["UserIsNotExists"],
 						Errors: []string{"User is not exists"}})
 					return
 				}
 				log.Printf("Error scaning user password from DB response with error: %s", err)
 				json.NewEncoder(w).Encode(response{
 					Status: "error",
+					Message: pageData.Translation["ErrorTryAgain"],
 					Errors: []string{"Internal server error"}})
 				return
 			}
@@ -136,6 +139,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 				log.Printf("Invalid password: %s", err)
 				json.NewEncoder(w).Encode(response{
 					Status: "error",
+					Message: pageData.Translation["InvalidUserOrPassword"],
 					Errors: []string{"Invalid password"}})
 				return
 			} else {
@@ -144,7 +148,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 				session.Values["authenticated"] = true
 				session.Options.MaxAge = 3600
 				session.Save(r, w)
-				
+
 				json.NewEncoder(w).Encode(response{
 					Status: "ok",
 					Errors: []string{},
@@ -156,6 +160,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Login or password is empty")
 			json.NewEncoder(w).Encode(response{
 				Status: "error",
+				Message: pageData.Translation["EmptyLoginOrPassword"],
 				Errors: []string{"Login or password is empty"}})
 			return
 		}
