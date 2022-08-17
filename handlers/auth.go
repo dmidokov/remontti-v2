@@ -15,8 +15,9 @@ func auth(f http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Internal Server Error", 500)
 		}
 
-		if session.Values["authenticated"] == true {
+		if auth, ok := session.Values["authenticated"].(bool); ok && auth {
 			session.Options.MaxAge = 3600
+			session.Save(r, w)
 			f(w, r)
 		} else {
 			login(w, r)

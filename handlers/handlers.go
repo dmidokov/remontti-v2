@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/antonlindstrom/pgstore"
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
 )
 
@@ -14,11 +14,11 @@ import (
 // передачи конфигурации в функции обработчики
 var cfg *config.Configuration
 var conn *sql.DB
-var sessionStore *pgstore.PGStore
+var sessionStore *sessions.CookieStore
 
 // Возвращает *mux.Router, c handlerFunction
 // А также файловые сервер для выдачи статики css/js/jpg/...
-func Router(con *sql.DB, store *pgstore.PGStore, config *config.Configuration) *mux.Router {
+func Router(con *sql.DB, store *sessions.CookieStore, config *config.Configuration) *mux.Router {
 
 	cfg = config
 	conn = con

@@ -5,5 +5,6 @@ export DB_PORT=<database_port>
 export DB_NAME=<database_name>
 export ROOT_PATH=<path_to_root_of_application>
 export ADMIN_PASSWORD=<crm_admin_password>
+export SESSION_SECRET=<session_secrec_key>
 
 go run ./main.go

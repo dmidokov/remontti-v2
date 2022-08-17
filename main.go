@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/dmidokov/remontti-v2/database"
 	"github.com/dmidokov/remontti-v2/handlers"
-	"github.com/dmidokov/remontti-v2/sessions"
+
+	"github.com/gorilla/sessions"
 )
 
 func main() {
@@ -41,17 +41,8 @@ func main() {
 		log.Fatalf("Databas preparing ending with error: %s", err)
 	}
 
-	store, err := sessions.GetStore(
-		config.DB_HOST,
-		config.DB_PORT,
-		config.DB_USER,
-		config.DB_PASSWORD,
-		config.DB_NAME)
-	if err != nil {
-		log.Fatalf("Can't create log storage with an error: %s", err)
-	}
-	defer store.Close()
-	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
+	log.Print("Prepare sessions storage")
+	store := sessions.NewCookieStore([]byte(config.SESSIONS_SECRET))
 
 	// Регистрируем обработчики получаем роутер
 	log.Print("Registrate handlers")
