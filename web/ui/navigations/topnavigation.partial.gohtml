@@ -1,0 +1,3 @@
+{{define "topnavigation"}}
+    {{range $key, $value := .Navigation}} <a href={{$value.Link}}>{{$value.Translation}}</a> {{end}}
+{{end}}

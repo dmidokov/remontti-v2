@@ -1,7 +1,7 @@
 {{define "header"}}
 <header class="main-header">
     <div>{{ .Translation.PageTitle }}</div>
-    <div>---Навигация--</div>
+    <div>{{template "topnavigation" .}}</div>
     <div class="left-side-menu">
         <div class="dropdown">
             <img class="header-icon" src="/static/images/account.png">

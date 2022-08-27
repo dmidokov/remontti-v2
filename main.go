@@ -7,17 +7,27 @@ import (
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/dmidokov/remontti-v2/database"
 	"github.com/dmidokov/remontti-v2/handlers"
+	"github.com/dmidokov/remontti-v2/navigationservice"
 
 	"github.com/gorilla/sessions"
 )
 
+type application struct {
+	config     *config.Configuration
+	navigation *navigationservice.NavigationModel
+	database   *database.DatabaseModel
+	handlers   *handlers.HandlersModel
+}
+
 func main() {
 
-	log.Print("Starting the service...")
+	var app application
+
+	log.Print("Запуск сервиса...")
 
 	// Пытаемся загрузить конфигурацию
 	// Если нет выходим с ошибкой
-	log.Print("Trying to load configuration")
+	log.Print("Загрузка конфигурации")
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -25,7 +35,7 @@ func main() {
 
 	// Подключаемся в БД, параметры подключения берем из конфигурации
 	// Если нет выходим с ошибкой
-	log.Print("Trying to connect to database")
+	log.Print("Подключение к БД")
 	conn, err := database.ConnectToDB(
 		config.DB_HOST,
 		config.DB_PORT,
@@ -33,22 +43,33 @@ func main() {
 		config.DB_PASSWORD,
 		config.DB_NAME)
 	if err != nil {
-		log.Fatalf("Connecting to DB finish with error : %s", err)
+		log.Fatalf("Подключение завершилось с ошибкой : %s", err)
 	}
 
-	err = database.PrepareDB(config)
+	app = application{
+		config:     config,
+		navigation: &navigationservice.NavigationModel{DB: conn},
+		database:   &database.DatabaseModel{DB: conn},
+		handlers:   &handlers.HandlersModel{DB: conn},
+	}
+
+	log.Print("Подкотовка БД")
+	err = app.database.Prepare(config)
 	if err != nil {
-		log.Fatalf("Databas preparing ending with error: %s", err)
+		log.Fatalf("Подготовка завершилась с ошибкой: %s", err)
 	}
 
-	log.Print("Prepare sessions storage")
+	log.Print("Подготовка хранилища сесссий")
 	store := sessions.NewCookieStore([]byte(config.SESSIONS_SECRET))
 
 	// Регистрируем обработчики получаем роутер
-	log.Print("Registrate handlers")
-	router := handlers.Router(conn, store, config)
+	log.Print("Регистрация обработчиком запросов")
+	router, err := app.handlers.Router(conn, store, config)
+	if err != nil {
+		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
+	}
 
-	log.Print("The service is ready to listen and serve")
+	log.Print("Сервис запущен и готов к приему запросов")
 
 	// Запускаем лиснер
 	log.Fatal(http.ListenAndServe(":8000", router))

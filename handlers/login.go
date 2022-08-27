@@ -1,20 +1,27 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"text/template"
 
-	"github.com/dmidokov/remontti-v2/database"
-	"github.com/dmidokov/remontti-v2/translations"
+	"github.com/dmidokov/remontti-v2/userservice"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type navigationData struct {
+	Translation string
+	Link        string
+}
 
 type loginPageData struct {
 	Title       string
 	Translation map[string]string
+	Navigation  map[string]navigationData
+	Exam        string
 }
 
 type User struct {
@@ -28,10 +35,15 @@ type response struct {
 	Message string   `json:"message" `
 }
 
-var pageData = loginPageData{}
-
 // Страница логина
 func login(w http.ResponseWriter, r *http.Request) {
+
+	var pageData = loginPageData{
+		Title:       "",
+		Translation: make(map[string]string),
+		Navigation:  make(map[string]navigationData),
+	}
+
 	if r.Method == "GET" {
 
 		var rootPath = cfg.ROOT_PATH + "/web/ui/"
@@ -54,10 +66,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		pageData.Title = "Вход"
-		pageData.Translation, err = translations.GetTranslations("loginpage", cfg)
 
+		translations, err := translation.Get("loginpage", cfg)
 		if err != nil {
 			println(err.Error())
+		}
+
+		for _, translation := range translations {
+			pageData.Translation[translation.Label] = translation.Ru
 		}
 
 		err = ts.Execute(w, pageData)
@@ -85,11 +101,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 		if len(v.Login) > 0 && len(v.Password) > 0 {
 
-			row := conn.QueryRow(
+			row := conn.QueryRow(context.Background(),
 				"SELECT password FROM users WHERE user_name=$1",
 				v.Login)
 
-			var user database.Users
+			var user userservice.User
 
 			err := row.Scan(&user.Password)
 

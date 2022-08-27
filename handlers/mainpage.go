@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-
-	"github.com/dmidokov/remontti-v2/translations"
 )
 
 // Функция обработчик для главной страницы
@@ -20,6 +18,13 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		rootPath + "footers/footer.partial.gohtml",
 		rootPath + "headers/mainpage.partial.gohtml",
 		rootPath + "bodies/mainpage.partial.gohtml",
+		rootPath + "navigations/topnavigation.partial.gohtml",
+	}
+
+	var pageData = loginPageData{
+		Title:       "",
+		Translation: make(map[string]string),
+		Navigation:  make(map[string]navigationData),
 	}
 
 	ts, err := template.ParseFiles(files...)
@@ -29,14 +34,37 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pageData.Exam = "some string"
 	pageData.Title = "Меню"
-	pageData.Translation, err = translations.GetTranslations("mainpage", cfg)
+	translations, err := translation.Get("mainpage", cfg)
+
+	for _, translation := range translations {
+		pageData.Translation[translation.Label] = translation.Ru
+	}
 
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
+
+	items, err := navigation.GetAll()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	labels := make(map[string]navigationData)
+
+	for _, item := range items {
+		labels[item.Label] = navigationData{
+			Link:        item.Link,
+			Translation: pageData.Translation[item.Label],
+		}
+	}
+
+	pageData.Navigation = labels
 
 	err = ts.Execute(w, pageData)
 	if err != nil {
