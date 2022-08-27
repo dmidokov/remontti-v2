@@ -56,7 +56,7 @@ func (h *HandlersModel) loginGET(w http.ResponseWriter, r *http.Request) {
 
 	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: h.DB}
 
-	var rootPath = h.Cfg.ROOT_PATH + "/web/ui/"
+	var rootPath = h.Config.ROOT_PATH + "/web/ui/"
 
 	files := []string{
 		rootPath + "login.page.gohtml",
@@ -77,7 +77,7 @@ func (h *HandlersModel) loginGET(w http.ResponseWriter, r *http.Request) {
 
 	pageData.Title = "Вход"
 
-	translations, err := translation.Get("loginpage", h.Cfg)
+	translations, err := translation.Get("loginpage", h.Config)
 	if err != nil {
 		println(err.Error())
 	}
@@ -99,7 +99,7 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: h.DB}
 
-	translations, err := translation.Get("loginpage", h.Cfg)
+	translations, err := translation.Get("loginpage", h.Config)
 	if err != nil {
 		println(err.Error())
 	}

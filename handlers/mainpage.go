@@ -15,7 +15,7 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 	var navigation navigationservice.NavigationModel = navigationservice.NavigationModel{DB: hm.DB}
 	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: hm.DB}
 
-	var rootPath = hm.Cfg.ROOT_PATH + "/web/ui/"
+	var rootPath = hm.Config.ROOT_PATH + "/web/ui/"
 
 	// Список файлов для шаблона
 	files := []string{
@@ -42,7 +42,7 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 
 	pageData.Exam = "some string"
 	pageData.Title = "Меню"
-	translations, err := translation.Get("mainpage", hm.Cfg)
+	translations, err := translation.Get("mainpage", hm.Config)
 
 	for _, translation := range translations {
 		pageData.Translation[translation.Label] = translation.Ru

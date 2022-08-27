@@ -16,14 +16,14 @@ import (
 
 type HandlersModel struct {
 	DB          *pgx.Conn
-	Cfg         *config.Configuration
+	Config      *config.Configuration
 	CookieStore *sessions.CookieStore
 }
 
 func New(db *pgx.Conn, cfg *config.Configuration, cookieStore *sessions.CookieStore) *HandlersModel {
 	return &HandlersModel{
 		DB:          db,
-		Cfg:         cfg,
+		Config:      cfg,
 		CookieStore: cookieStore,
 	}
 }
