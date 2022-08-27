@@ -30,6 +30,12 @@ type NavigationModel struct {
 
 var ErrItemAlredyExists = errors.New("navigation: Item already exists")
 
+func New(db *pgx.Conn) *NavigationModel {
+	return &NavigationModel{
+		DB: db,
+	}
+}
+
 func rowProcessing(row pgx.Row) (*NavigationItem, error) {
 
 	var navigation = &NavigationItem{}
@@ -169,8 +175,4 @@ func (n *NavigationModel) CreateBatch(items []*NavigationItemInsert) error {
 
 	return nil
 
-}
-
-func (item *NavigationItem) GetId() int {
-	return item.Id
 }
