@@ -5,11 +5,11 @@ import (
 	"net/http"
 )
 
-func auth(f http.HandlerFunc) http.HandlerFunc {
+func (hm *HandlersModel) auth(f http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		session, err := sessionStore.Get(r, "session-key")
+		session, err := hm.CookieStore.Get(r, "session-key")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Internal Server Error", 500)
@@ -20,7 +20,7 @@ func auth(f http.HandlerFunc) http.HandlerFunc {
 			session.Save(r, w)
 			f(w, r)
 		} else {
-			login(w, r)
+			hm.login(w, r)
 		}
 
 	}

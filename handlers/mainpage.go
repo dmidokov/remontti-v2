@@ -4,12 +4,18 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+
+	"github.com/dmidokov/remontti-v2/navigationservice"
+	"github.com/dmidokov/remontti-v2/translationservice"
 )
 
 // Функция обработчик для главной страницы
-func mainPage(w http.ResponseWriter, r *http.Request) {
+func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 
-	var rootPath = cfg.ROOT_PATH + "/web/ui/"
+	var navigation navigationservice.NavigationModel = navigationservice.NavigationModel{DB: hm.DB}
+	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: hm.DB}
+
+	var rootPath = hm.Cfg.ROOT_PATH + "/web/ui/"
 
 	// Список файлов для шаблона
 	files := []string{
@@ -36,7 +42,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 
 	pageData.Exam = "some string"
 	pageData.Title = "Меню"
-	translations, err := translation.Get("mainpage", cfg)
+	translations, err := translation.Get("mainpage", hm.Cfg)
 
 	for _, translation := range translations {
 		pageData.Translation[translation.Label] = translation.Ru
