@@ -54,3 +54,8 @@ func (hm *HandlersModel) Router() (*mux.Router, error) {
 func settings(w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, "Hello! Request was processed settings")
 }
+
+func Redirect(w http.ResponseWriter, r *http.Request) {
+	target := "https://" + r.Host + r.URL.Path
+	http.Redirect(w, r, target, http.StatusMovedPermanently)
+}
