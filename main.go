@@ -13,6 +13,8 @@ import (
 
 func main() {
 
+	finish := make(chan bool)
+
 	log.Print("Запуск сервиса...")
 
 	// Пытаемся загрузить конфигурацию
@@ -39,7 +41,7 @@ func main() {
 	log.Print("Подготовка хранилища сесссий")
 	store := sessions.NewCookieStore([]byte(config.SESSIONS_SECRET))
 
-	handlers := handlers.New(conn, config, store)
+	handler := handlers.New(conn, config, store)
 	database := &database.DatabaseModel{DB: conn}
 
 	log.Print("Подкотовка БД")
@@ -50,13 +52,25 @@ func main() {
 
 	// Регистрируем обработчики получаем роутер
 	log.Print("Регистрация обработчиком запросов")
-	router, err := handlers.Router()
+	router443, err := handler.Router()
 	if err != nil {
 		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
 	}
 
 	log.Print("Сервис запущен и готов к приему запросов")
 
+	if err != nil {
+		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
+	}
+
 	// Запускаем лиснер
-	log.Fatal(http.ListenAndServe(":8000", router))
+	go func() {
+		log.Fatal(http.ListenAndServeTLS(":443", "secrets/localhost2.crt", "secrets/localhost2.key", router443))
+	}()
+
+	go func() {
+		log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(handlers.Redirect)))
+	}()
+
+	<-finish
 }

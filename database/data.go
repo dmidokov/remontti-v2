@@ -26,6 +26,7 @@ func GetNavigationDataToInsert(cfg *config.Configuration) navigationList {
 	return navigationList{
 		&navigationservice.NavigationItem{Item_type: 1, Link: "/settings", Label: "Settings", EditTime: 0},
 		&navigationservice.NavigationItem{Item_type: 1, Link: "/logout", Label: "Logout", EditTime: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/home", Label: "Home", EditTime: 0},
 	}
 
 }
@@ -76,6 +77,7 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 		&translationservice.Translation{Name: "mainpage", Label: "AccountSettings", Ru: "Управление аккаунтом", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "mainpage", Label: "Logout", Ru: "Выход", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "mainpage", Label: "Settings", Ru: "Настройки", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "mainpage", Label: "Home", Ru: "Главная", En: "", EditTime: 0},
 	}
 
 	result = append(result, loginpage...)
