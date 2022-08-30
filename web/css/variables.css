@@ -17,4 +17,11 @@
 
   --modal-header-text-color: #fff;
   --background-text-color: #999;
+
+  --light-primary-40: #e2e4f0;
+  --primary-80: #6372c2;
+  --white-100: #fff;
+  --black-015: rgba(0, 0, 0, 0.15);
+  --black-100: #000;
+  --error-message: #a70000;
 }

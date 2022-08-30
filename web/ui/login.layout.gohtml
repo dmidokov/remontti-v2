@@ -1,0 +1,23 @@
+{{define "base"}}
+  <!doctype html>
+
+  <head>
+    <title>{{ .Title }}</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="/static/scripts/components.js"></script>
+    <script src="/static/scripts/main.js"></script>
+  </head>
+
+  <body>
+
+    {{template "main" .}}
+
+  </body>
+
+  {{ block "head" .}}{{end}}
+  
+</html>
+{{ end }}
