@@ -60,9 +60,7 @@ func (h *HandlersModel) loginGET(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		rootPath + "login.page.gohtml",
-		rootPath + "base.layout.gohtml",
-		rootPath + "footers/footer.partial.gohtml",
-		rootPath + "headers/headerNoAuth.partial.gohtml",
+		rootPath + "login.layout.gohtml",
 		rootPath + "navigations/navigationNoAuth.partial.gohtml",
 		rootPath + "bodies/login.partial.gohtml",
 		rootPath + "heads/login.partial.gohtml",
