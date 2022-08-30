@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/dmidokov/remontti-v2/companyservice"
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/dmidokov/remontti-v2/navigationservice"
 	"github.com/dmidokov/remontti-v2/permissionservice"
@@ -12,6 +13,13 @@ type usersList []*userservice.User
 type navigationList []*navigationservice.NavigationItem
 type permissionsList []*permissionservice.Permissons
 type translationsList []*translationservice.Translation
+type companiesList []*companyservice.Company
+
+func GetCompaniesDataToInsert(cfg *config.Configuration) companiesList {
+	return companiesList{
+		&companyservice.Company{CompanyId: 0, CompanyName: "CONTROL", HostName: "control.remontti.site", EditTime: 0},
+	}
+}
 
 func GetUserDataToInsert(cfg *config.Configuration) usersList {
 
@@ -40,16 +48,16 @@ func (pg *DatabaseModel) GetPermissionsDataToInsert(cfg *config.Configuration) (
 		return nil, err
 	}
 
+	var permissionList permissionsList = permissionsList{}
+	var actions = permissionservice.Actions
+
 	items, err := navigationservice.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	var permissionList permissionsList = permissionsList{}
-	var actions = permissionservice.Actions
-
 	for _, item := range items {
-		permissionList = append(permissionList, &permissionservice.Permissons{ComponentId: item.Id, UserIid: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
+		permissionList = append(permissionList, &permissionservice.Permissons{ComponentId: item.Id, ComponentType: "navigation", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
 	}
 
 	return permissionList, nil

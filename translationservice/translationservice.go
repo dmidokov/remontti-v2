@@ -25,7 +25,7 @@ type Translation struct {
 // Закешировать
 func (t *TranslationsModel) Get(pagename string, cfg *config.Configuration) ([]*Translation, error) {
 
-	sql := `SELECT * FROM public.translations WHERE name=$1`
+	sql := `SELECT * FROM remonttiv2.translations WHERE name=$1`
 
 	rows, err := t.DB.Query(context.Background(), sql, pagename)
 	if err != nil {
@@ -39,7 +39,7 @@ func (t *TranslationsModel) Get(pagename string, cfg *config.Configuration) ([]*
 
 func (t *TranslationsModel) GetAll() ([]*Translation, error) {
 
-	sql := `SELECT * FROM public.translations WHERE 1=1`
+	sql := `SELECT * FROM remonttiv2.translations WHERE 1=1`
 
 	rows, err := t.DB.Query(context.Background(), sql)
 	if err != nil {

@@ -41,6 +41,7 @@
     export ROOT_PATH=<path_to_root_of_application>
     export ADMIN_PASSWORD=<crm_admin_password>
     export SESSION_SECRET=<session_secrec_key>
+    export DELETE_TABLES_BEFORE_START=<0||1>
     ```
 
     > `ADMIN_PASSWORD` - пароль для пользователя `admin`, <br> `SESSION_SECRET` - секрет которым будут шифроваться данные пользовательской сессии  

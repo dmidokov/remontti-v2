@@ -69,7 +69,7 @@ func rowsProcessing(rows pgx.Rows) ([]*NavigationItem, error) {
 
 func (n *NavigationModel) GetAll() ([]*NavigationItem, error) {
 
-	sql := "SELECT * FROM public.navigation WHERE 1=1"
+	sql := "SELECT * FROM remonttiv2.navigation WHERE 1=1"
 
 	rows, err := n.DB.Query(context.Background(), sql)
 	if err != nil {
@@ -84,7 +84,7 @@ func (n *NavigationModel) GetAll() ([]*NavigationItem, error) {
 
 func (n *NavigationModel) GetByType(itemType int) ([]*NavigationItem, error) {
 
-	sql := "SELECT * FROM public.navigation WHERE item_type=$1"
+	sql := "SELECT * FROM remonttiv2.navigation WHERE item_type=$1"
 
 	rows, err := n.DB.Query(context.Background(), sql, itemType)
 	if err != nil {
@@ -99,7 +99,7 @@ func (n *NavigationModel) GetByType(itemType int) ([]*NavigationItem, error) {
 
 func (n *NavigationModel) GetById(id int) (*NavigationItem, error) {
 
-	sql := "SELECT * FROM public.navigation WHERE id=$1"
+	sql := "SELECT * FROM remonttiv2.navigation WHERE id=$1"
 
 	row := n.DB.QueryRow(context.Background(), sql, id)
 
@@ -110,7 +110,7 @@ func (n *NavigationModel) GetById(id int) (*NavigationItem, error) {
 // Получает строку из таблица navigation по типу пункта меню, сслыке и заголовку
 func (n *NavigationModel) Get(itemType int, link, label string) (*NavigationItem, error) {
 
-	sql := "SELECT * FROM public.navigation WHERE item_type=$1 AND link=$2 AND label=$3"
+	sql := "SELECT * FROM remonttiv2.navigation WHERE item_type=$1 AND link=$2 AND label=$3"
 
 	row := n.DB.QueryRow(context.Background(), sql, itemType, link, label)
 
@@ -132,7 +132,7 @@ func (n *NavigationModel) Create(itemType int, link, label string) (*NavigationI
 	editTime := time.Now().Unix()
 
 	sql := `
-		INSERT INTO public.navigation (item_type, link, label, edit_time)
+		INSERT INTO remonttiv2.navigation (item_type, link, label, edit_time)
 		VALUES ($1, $2, $3, $4)`
 
 	_, err = n.DB.Exec(context.Background(), sql, itemType, link, label, editTime)
@@ -155,7 +155,7 @@ func (n *NavigationModel) CreateBatch(items []*NavigationItemInsert) error {
 	var batch *pgx.Batch
 
 	sql := `
-		INSERT INTO public.navigation (item_type, link, label, edit_time)
+		INSERT INTO remonttiv2.navigation (item_type, link, label, edit_time)
 		VALUES ($1, $2, $3, $4)`
 
 	for _, item := range items {
