@@ -123,7 +123,7 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 	if len(v.Login) > 0 && len(v.Password) > 0 {
 
 		row := h.DB.QueryRow(context.Background(),
-			"SELECT password FROM users WHERE user_name=$1",
+			"SELECT password FROM remonttiv2.users WHERE user_name=$1",
 			v.Login)
 
 		var user userservice.User

@@ -6,5 +6,5 @@ $Env:DB_NAME=<db_name>
 $Env:ROOT_PATH=<path_to_root_of_application>
 $Env:ADMIN_PASSWORD=<crm_admin_password>
 $Env:SESSION_SECRET=<session_secrec_key>
-
+$Env:DELETE_TABLES_BEFORE_START=<0||1>
 go run .\main.go

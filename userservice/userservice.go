@@ -31,7 +31,7 @@ var ErrUserAlreadyExists = errors.New("users: User already exists")
 func (u *UserModel) GetByNameAndCompanyId(userName string, companyId int) (*User, error) {
 	sql := `SELECT * 
 			FROM 
-				public.users 
+				remonttiv2.users 
 			WHERE 
 				user_name=$1 AND company_id=$2;`
 	row := u.DB.QueryRow(context.Background(), sql, userName, companyId)
@@ -66,7 +66,7 @@ func (u *UserModel) Create(userName string, password string, companyId int) (*Us
 		return user, ErrUserAlreadyExists
 	}
 
-	sql := `INSERT INTO public.users 
+	sql := `INSERT INTO remonttiv2.users 
 				(company_id, user_name, password, last_login_date, last_login_error_date) 
 			VALUES 
 				($1, $2, $3, $4, $5);`
@@ -86,7 +86,7 @@ func (u *UserModel) Create(userName string, password string, companyId int) (*Us
 
 func (u *UserModel) GetAll() ([]*User, error) {
 	
-	sql := `SELECT * FROM public.users WHERE 1=1;`
+	sql := `SELECT * FROM remonttiv2.users WHERE 1=1;`
 
 	rows, err := u.DB.Query(context.Background(), sql)
 	if err != nil {

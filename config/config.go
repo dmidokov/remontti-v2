@@ -5,6 +5,7 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
 )
 
 // Функция заполняет структуру config из переменных окружения
@@ -17,6 +18,7 @@ func LoadConfig() (*Configuration, error) {
 
 	var config = Configuration{}
 	var exist bool
+	var err error
 
 	if config.DB_USER, exist = os.LookupEnv(DB_USER); !exist {
 		return &Configuration{}, errors.New("database  username is missing")
@@ -48,6 +50,15 @@ func LoadConfig() (*Configuration, error) {
 
 	if config.SESSIONS_SECRET, exist = os.LookupEnv(SESSION_SECRET); !exist {
 		return &Configuration{}, errors.New("session secrec is empty")
+	}
+
+	if value, exist := os.LookupEnv(DELETE_TABLES_BEFORE_START); !exist {
+		return &Configuration{}, errors.New("delete tables key is empty")
+	} else {
+		config.DELETE_TABLES_BEFORE_START, err = strconv.Atoi(value)
+		if err != nil {
+			return &Configuration{}, errors.New("delete tables key is wrong")
+		}
 	}
 
 	// Возвращаем конфиг если не вышли ранее с ошибкой
