@@ -19,9 +19,13 @@
   --background-text-color: #999;
 
   --light-primary-40: #e2e4f0;
+  --light-primary-80: #cfd2eb;
   --primary-80: #6372c2;
   --white-100: #fff;
   --black-015: rgba(0, 0, 0, 0.15);
+  --black-025: rgba(0, 0, 0, 0.25);
   --black-100: #000;
   --error-message: #a70000;
+  --column-border: #3f51b5;
+  --dark-primary-100:#303F9F;
 }

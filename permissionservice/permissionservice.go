@@ -34,7 +34,7 @@ type Permissons struct {
 	EditTime      int
 }
 
-// Ошибка - разрешение уже существует
+// ErrPermissionAlreadyExists Ошибка - разрешение уже существует
 var ErrPermissionAlreadyExists = errors.New("permissions: Permission already exists")
 
 // Обработка строки ответа от БД
@@ -70,7 +70,7 @@ func rowsProcessing(rows pgx.Rows) ([]*Permissons, error) {
 	return result, nil
 }
 
-// Возвращает Разрешения компонента для пользователя
+// GetByComponentIdAndUserId Возвращает Разрешения компонента для пользователя
 func (p *PermissionModel) GetByComponentIdAndUserId(component_id, user_id int) (*Permissons, error) {
 	sql := "SELECT * FROM remonttiv2.permissions WHERE component_id=$1 AND user_id=$2"
 	row := p.DB.QueryRow(context.Background(), sql, component_id, user_id)
@@ -78,7 +78,7 @@ func (p *PermissionModel) GetByComponentIdAndUserId(component_id, user_id int) (
 	return rowProcessing(row)
 }
 
-// Возвращает Разрешения по их идентификатору
+// GetById Возвращает Разрешения по их идентификатору
 func (p *PermissionModel) GetById(id int) (*Permissons, error) {
 	sql := "SELECT * FROM remonttiv2.permissions WHERE permisson_id=$1"
 	row := p.DB.QueryRow(context.Background(), sql, id)
@@ -98,10 +98,10 @@ func (p *PermissionModel) GetAll() ([]*Permissons, error) {
 	return rowsProcessing(rows)
 }
 
-// Создает новые Разрешения на компонент для пользователя
-func (p *PermissionModel) Set(component_id, user_id, actions int) (*Permissons, error) {
+// Set Создает новые Разрешения на компонент для пользователя
+func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissons, error) {
 
-	permission, err := p.GetByComponentIdAndUserId(component_id, user_id)
+	permission, err := p.GetByComponentIdAndUserId(componentId, userId)
 
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
@@ -110,7 +110,7 @@ func (p *PermissionModel) Set(component_id, user_id, actions int) (*Permissons, 
 	if permission != nil {
 
 		sql := "UPDATE remonttiv2.permissions SET actions=$1, edit_date=$2 WHERE component_id=$3 AND user_id=$4"
-		_, err = p.DB.Exec(context.Background(), sql, actions, time.Now().Unix(), component_id, user_id)
+		_, err = p.DB.Exec(context.Background(), sql, actions, time.Now().Unix(), componentId, userId)
 		if err != nil {
 			return nil, err
 		}
@@ -119,12 +119,12 @@ func (p *PermissionModel) Set(component_id, user_id, actions int) (*Permissons, 
 	} else {
 
 		sql := "INSERT INTO remonttiv2.permissions (component_id, user_id, actions, edit_date) VALUES ($1, $2, $3, $4)"
-		_, err = p.DB.Exec(context.Background(), sql, component_id, user_id, actions, time.Now().Unix())
+		_, err = p.DB.Exec(context.Background(), sql, componentId, userId, actions, time.Now().Unix())
 
 		if err != nil {
 			return nil, err
 		}
-		return p.GetByComponentIdAndUserId(component_id, user_id)
+		return p.GetByComponentIdAndUserId(componentId, userId)
 
 	}
 

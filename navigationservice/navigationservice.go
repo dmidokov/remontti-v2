@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/dmidokov/remontti-v2/permissionservice"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
@@ -19,16 +20,16 @@ type NavigationItem struct {
 }
 
 type NavigationItemInsert struct {
-	Item_type int
-	Link      string
-	Label     string
+	ItemType int
+	Link     string
+	Label    string
 }
 
 type NavigationModel struct {
 	DB *pgx.Conn
 }
 
-var ErrItemAlredyExists = errors.New("navigation: Item already exists")
+var ErrItemAlreadyExists = errors.New("navigation: Item already exists")
 
 func New(db *pgx.Conn) *NavigationModel {
 	return &NavigationModel{
@@ -82,6 +83,28 @@ func (n *NavigationModel) GetAll() ([]*NavigationItem, error) {
 
 }
 
+func (n *NavigationModel) GetAllForUser(userId int) ([]*NavigationItem, error) {
+
+	sql := `SELECT 
+				remonttiv2.navigation.id, remonttiv2.navigation.item_type, remonttiv2.navigation.link, 
+				remonttiv2.navigation.label, remonttiv2.navigation.edit_time
+			FROM 
+				remonttiv2.navigation, remonttiv2.permissions 
+			WHERE 
+				remonttiv2.navigation.id = remonttiv2.permissions.component_id AND
+				(remonttiv2.permissions.actions & $1) = $1;`
+
+	rows, err := n.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	return rowsProcessing(rows)
+
+}
+
 func (n *NavigationModel) GetByType(itemType int) ([]*NavigationItem, error) {
 
 	sql := "SELECT * FROM remonttiv2.navigation WHERE item_type=$1"
@@ -107,7 +130,7 @@ func (n *NavigationModel) GetById(id int) (*NavigationItem, error) {
 
 }
 
-// Получает строку из таблица navigation по типу пункта меню, сслыке и заголовку
+// Get Получает строку из таблица navigation по типу пункта меню, сслыке и заголовку
 func (n *NavigationModel) Get(itemType int, link, label string) (*NavigationItem, error) {
 
 	sql := "SELECT * FROM remonttiv2.navigation WHERE item_type=$1 AND link=$2 AND label=$3"
@@ -117,7 +140,7 @@ func (n *NavigationModel) Get(itemType int, link, label string) (*NavigationItem
 	return rowProcessing(row)
 }
 
-// Есть лишние действия -- проверка на существование,
+// Create Есть лишние действия -- проверка на существование,
 func (n *NavigationModel) Create(itemType int, link, label string) (*NavigationItem, error) {
 
 	item, err := n.Get(itemType, link, label)
@@ -126,7 +149,7 @@ func (n *NavigationModel) Create(itemType int, link, label string) (*NavigationI
 		return nil, err
 	}
 	if item != nil {
-		return item, ErrItemAlredyExists
+		return item, ErrItemAlreadyExists
 	}
 
 	editTime := time.Now().Unix()
@@ -159,7 +182,7 @@ func (n *NavigationModel) CreateBatch(items []*NavigationItemInsert) error {
 		VALUES ($1, $2, $3, $4)`
 
 	for _, item := range items {
-		batch.Queue(sql, item.Item_type, item.Link, item.Label, time.Now().Unix())
+		batch.Queue(sql, item.ItemType, item.Link, item.Label, time.Now().Unix())
 	}
 
 	result := n.DB.SendBatch(context.Background(), batch)

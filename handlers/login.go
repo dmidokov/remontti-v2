@@ -1,39 +1,27 @@
 package handlers
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"text/template"
 
+	"github.com/dmidokov/remontti-v2/companyservice"
 	"github.com/dmidokov/remontti-v2/translationservice"
 	"github.com/dmidokov/remontti-v2/userservice"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type navigationData struct {
-	Translation string
-	Link        string
-}
-
 type loginPageData struct {
 	Title       string
 	Translation map[string]string
 	Navigation  map[string]navigationData
-	Exam        string
 }
 
 type User struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
-}
-
-type response struct {
-	Status  string   `json:"status"`
-	Errors  []string `json:"errors"`
-	Message string   `json:"message" `
 }
 
 var pageData = loginPageData{
@@ -75,7 +63,7 @@ func (h *HandlersModel) loginGET(w http.ResponseWriter, r *http.Request) {
 
 	pageData.Title = "Вход"
 
-	translations, err := translation.Get("loginpage", h.Config)
+	translations, err := translation.Get("loginpage")
 	if err != nil {
 		println(err.Error())
 	}
@@ -95,9 +83,13 @@ func (h *HandlersModel) loginGET(w http.ResponseWriter, r *http.Request) {
 
 func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
-	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: h.DB}
+	host := r.Host
 
-	translations, err := translation.Get("loginpage", h.Config)
+	var companies companyservice.CompanyModel = companyservice.CompanyModel{DB: h.DB}
+	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: h.DB}
+	var users userservice.UserModel = userservice.UserModel{DB: h.DB}
+
+	translations, err := translation.Get("loginpage")
 	if err != nil {
 		println(err.Error())
 	}
@@ -122,13 +114,17 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 	if len(v.Login) > 0 && len(v.Password) > 0 {
 
-		row := h.DB.QueryRow(context.Background(),
-			"SELECT password FROM remonttiv2.users WHERE user_name=$1",
-			v.Login)
+		// НЕПРАВИЛЬНОЕ ОПИСАНИЕ ОШИБКИ ИСПРАВИТЬ 
+		company, err := companies.GetCompanyByHostName(host)
+		if err != nil {
+			json.NewEncoder(w).Encode(response{
+				Status:  "error",
+				Message: pageData.Translation["ErrorTryAgain"],
+				Errors:  []string{"Internal server error"}})
+			return
+		}
 
-		var user userservice.User
-
-		err := row.Scan(&user.Password)
+		user, err := users.GetByNameAndCompanyId(v.Login, company.CompanyId)
 
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -160,6 +156,8 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 			session, _ := h.CookieStore.Get(r, "session-key")
 			session.Values["authenticated"] = true
+			session.Values["userid"] = user.Id
+			session.Values["companyid"] = company.CompanyId
 			session.Options.MaxAge = 3600
 			session.Save(r, w)
 

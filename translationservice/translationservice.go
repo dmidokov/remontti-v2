@@ -2,6 +2,7 @@ package translationservice
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/dmidokov/remontti-v2/config"
@@ -9,7 +10,8 @@ import (
 )
 
 type TranslationsModel struct {
-	DB *pgx.Conn
+	DB     *pgx.Conn
+	Config *config.Configuration // Возможно лишнее!!!
 }
 
 type Translation struct {
@@ -21,13 +23,18 @@ type Translation struct {
 	EditTime int
 }
 
-// TODO: Переделать на БД
-// Закешировать
-func (t *TranslationsModel) Get(pagename string, cfg *config.Configuration) ([]*Translation, error) {
+// Get Закешировать
+func (t *TranslationsModel) Get(pagenames ...string) ([]*Translation, error) {
 
-	sql := `SELECT * FROM remonttiv2.translations WHERE name=$1`
+	sql := `SELECT * FROM remonttiv2.translations WHERE `
+	for i, name := range pagenames {
+		if i > 0 {
+			sql += " OR "
+		}
+		sql += fmt.Sprintf("name='%s'", name)
+	}
 
-	rows, err := t.DB.Query(context.Background(), sql, pagename)
+	rows, err := t.DB.Query(context.Background(), sql)
 	if err != nil {
 		return nil, err
 	}

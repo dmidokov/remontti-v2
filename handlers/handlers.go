@@ -20,6 +20,12 @@ type HandlersModel struct {
 	CookieStore *sessions.CookieStore
 }
 
+type response struct {
+	Status  string   `json:"status"`
+	Errors  []string `json:"errors"`
+	Message string   `json:"message" `
+}
+
 func New(db *pgx.Conn, cfg *config.Configuration, cookieStore *sessions.CookieStore) *HandlersModel {
 	return &HandlersModel{
 		DB:          db,
@@ -41,6 +47,9 @@ func (hm *HandlersModel) Router() (*mux.Router, error) {
 
 	router.HandleFunc("/home", home).Methods("GET")
 	router.HandleFunc("/settings", hm.auth(settings)).Methods("Get")
+
+	router.HandleFunc("/companies", hm.auth(hm.companies)).Methods("GET")
+	router.HandleFunc("/companies/add", hm.auth(hm.addCompany)).Methods("POST")
 
 	router.HandleFunc("/registration", registration(router)).Methods("Get")
 

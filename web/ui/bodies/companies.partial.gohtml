@@ -1,0 +1,63 @@
+{{define "main"}}
+<main>
+    <div class="container container-middle direction-column">
+        
+        <div class="add-item-block-top margin-top-20px">
+            <div id="addNewCompany">
+                <button @click="openAddCompanyModal" class="button-middle">Добавить +</button>
+            </div>
+        </div>
+
+        <div class="margin-top-20px"></div>
+
+        {{ $edit := .Translation.EditCompany }}
+        {{ $delete := .Translation.DeleteCompany }}
+
+        <div class="table-container-3">
+            {{range $key, $value := .Companies}}
+                <div class="table-row">
+                    <div class="table-column-25 table-column">
+                        {{ $value.Name}}
+                    </div>
+                    <div class="table-column-50  table-column">
+                        {{ $value.Host }}
+                    </div>
+                    <div class="table-column-25  table-column">
+                        <div class="dots-block dropdown">
+                            <img class="more-button" src="/static/images/more_horizontal.svg">
+                            <img id="" class="more-button-white" src="/static/images/more_horizontal_white.svg">
+                                <ul class="dropdown-menu action-menu">
+                                    <li data-id="{{ $value.ID }}"> {{ $edit }} </li>
+                                    <li data-id="{{ $value.ID }}" >{{ $delete }}</li>
+                                </ul>
+                        </div>  
+                    </div>
+                </div>
+            {{ end }}
+        </div>
+
+    </div>
+
+    <div id="companies-modal" class="container login-container overhead-container container-middle direction-column invisible">
+        <div id="companyAddModal" class="modal-50 modal-small">
+            <div @click="close" class="close-button">
+                <div>X</div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-line-margin-10">
+                    <input class="companies-input" type="text" id="company-name">
+                </div>
+                
+                <div class="modal-line-margin-10">
+                    <input class="companies-input" type="text" id="company-host">
+                </div>
+                
+                <div class="modal-line-margin-10">
+                    <button @click="addCompany" class="companies-button" type="button">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+{{end}}
