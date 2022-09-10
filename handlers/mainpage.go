@@ -4,16 +4,16 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-
-	"github.com/dmidokov/remontti-v2/navigationservice"
-	"github.com/dmidokov/remontti-v2/translationservice"
 )
+
+type mainPageData struct {
+	Title       string
+	Translation map[string]string
+	Navigation  map[string]navigationData
+}
 
 // Функция обработчик для главной страницы
 func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
-
-	var navigation navigationservice.NavigationModel = navigationservice.NavigationModel{DB: hm.DB}
-	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: hm.DB}
 
 	var rootPath = hm.Config.ROOT_PATH + "/web/ui/"
 
@@ -27,12 +27,6 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 		rootPath + "navigations/topnavigation.partial.gohtml",
 	}
 
-	var pageData = loginPageData{
-		Title:       "",
-		Translation: make(map[string]string),
-		Navigation:  make(map[string]navigationData),
-	}
-
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())
@@ -40,38 +34,42 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageData.Exam = "some string"
-	pageData.Title = "Меню"
-	translations, err := translation.Get("mainpage", hm.Config)
-
-	for _, translation := range translations {
-		pageData.Translation[translation.Label] = translation.Ru
+	// Структура с данными для страницы
+	var pageData = mainPageData{
+		Title:       "",
+		Translation: make(map[string]string),
+		Navigation:  make(map[string]navigationData),
 	}
 
+	pageData.Title = "Меню" // нужно ли???
+
+	// Получаем переводы для нужных страниц, в данном случае
+	// для главной страницы, а также для верхнего навигационного меню
+	pageData.Translation, err = hm.getTranslations("mainpage", "navigation")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
-		return
 	}
 
-	items, err := navigation.GetAll()
+	// получаем данные сессии, а иименно
+	// идентификаторы пользователя и компании
+	sessionsData, err := hm.getSessionData(r)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
-		return
 	}
 
-	labels := make(map[string]navigationData)
-
-	for _, item := range items {
-		labels[item.Label] = navigationData{
-			Link:        item.Link,
-			Translation: pageData.Translation[item.Label],
-		}
+	// Получаем навигационное меню, точнее ссылки и переводы
+	// На вход подаются также и переводы, так как навигация в таблицах
+	// хранится как ссылки и лэйблы, и для верного отображения необходимо
+	// сматчить лейблы навигации и лейблы переводов
+	pageData.Navigation, err = hm.getUserNavigation(sessionsData.UserId, pageData.Translation)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
 	}
 
-	pageData.Navigation = labels
-
+	// Выполняем шаблон, стоит не забыть закешировать шаблоны в будущем
 	err = ts.Execute(w, pageData)
 	if err != nil {
 		log.Print(err)

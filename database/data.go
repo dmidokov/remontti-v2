@@ -35,6 +35,7 @@ func GetNavigationDataToInsert(cfg *config.Configuration) navigationList {
 		&navigationservice.NavigationItem{Item_type: 1, Link: "/settings", Label: "Settings", EditTime: 0},
 		&navigationservice.NavigationItem{Item_type: 1, Link: "/logout", Label: "Logout", EditTime: 0},
 		&navigationservice.NavigationItem{Item_type: 1, Link: "/home", Label: "Home", EditTime: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/companies", Label: "Companies", EditTime: 0},
 	}
 
 }
@@ -81,15 +82,27 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 	}
 
 	var mainpage = translationsList{
-		&translationservice.Translation{Name: "mainpage", Label: "LoginFieldHeader", Ru: "Меню...", En: "", EditTime: 0},
-		&translationservice.Translation{Name: "mainpage", Label: "AccountSettings", Ru: "Управление аккаунтом", En: "", EditTime: 0},
-		&translationservice.Translation{Name: "mainpage", Label: "Logout", Ru: "Выход", En: "", EditTime: 0},
-		&translationservice.Translation{Name: "mainpage", Label: "Settings", Ru: "Настройки", En: "", EditTime: 0},
-		&translationservice.Translation{Name: "mainpage", Label: "Home", Ru: "Главная", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "mainpage", Label: "Title", Ru: "Главная", En: "", EditTime: 0},
+	}
+
+	var navigation = translationsList{
+		&translationservice.Translation{Name: "navigation", Label: "LoginFieldHeader", Ru: "Меню...", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "AccountSettings", Ru: "Управление аккаунтом", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "Logout", Ru: "Выход", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "Settings", Ru: "Настройки", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "Home", Ru: "Главная", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "Companies", Ru: "Организации", En: "", EditTime: 0},
+	}
+
+	var companies = translationsList{
+		&translationservice.Translation{Name: "companies", Label: "EditCompany", Ru: "Редактировать", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "DeleteCompany", Ru: "Удалить", En: ""},
 	}
 
 	result = append(result, loginpage...)
 	result = append(result, mainpage...)
+	result = append(result, navigation...)
+	result = append(result, companies...)
 
 	return result
 }

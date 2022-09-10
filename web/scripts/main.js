@@ -1,5 +1,5 @@
-async function fetchPostRequestWithJsonBody(data) {
-    let response = await fetch('/login', {
+async function fetchPostRequestWithJsonBody(link, data) {
+    let response = await fetch(link, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8'
