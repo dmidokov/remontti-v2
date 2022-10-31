@@ -1,16 +1,14 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
-	"log"
-	"net/http"
-	"text/template"
-
 	"github.com/dmidokov/remontti-v2/companyservice"
 	"github.com/dmidokov/remontti-v2/translationservice"
 	"github.com/dmidokov/remontti-v2/userservice"
+	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
+	"log"
+	"net/http"
 )
 
 type loginPageData struct {
@@ -32,62 +30,31 @@ var pageData = loginPageData{
 
 // Страница логина
 func (hm *HandlersModel) login(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method == "GET" {
-		hm.loginGET(w, r)
-	} else if r.Method == "POST" {
+	if r.Method == "POST" {
 		hm.loginPOST(w, r)
+	} else {
+		if hm.Config.MODE == "dev" {
+			if r.Method == "OPTIONS" {
+				setCorsHeaders(&w, r)
+				return
+			}
+		} else {
+			http.Error(w, "Internal Server Error", 500)
+		}
 	}
 }
 
-func (h *HandlersModel) loginGET(w http.ResponseWriter, r *http.Request) {
+func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
-	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: h.DB}
-
-	var rootPath = h.Config.ROOT_PATH + "/web/ui/"
-
-	files := []string{
-		rootPath + "login.page.gohtml",
-		rootPath + "login.layout.gohtml",
-		rootPath + "navigations/navigationNoAuth.partial.gohtml",
-		rootPath + "bodies/login.partial.gohtml",
-		rootPath + "heads/login.partial.gohtml",
+	if hm.Config.MODE == "dev" {
+		setCorsHeaders(&w, r)
 	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	pageData.Title = "Вход"
-
-	translations, err := translation.Get("loginpage")
-	if err != nil {
-		println(err.Error())
-	}
-
-	for _, translation := range translations {
-		pageData.Translation[translation.Label] = translation.Ru
-	}
-
-	err = ts.Execute(w, pageData)
-	if err != nil {
-		log.Print(err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-}
-
-func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 	host := r.Host
 
-	var companies companyservice.CompanyModel = companyservice.CompanyModel{DB: h.DB}
-	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: h.DB}
-	var users userservice.UserModel = userservice.UserModel{DB: h.DB}
+	var companies = companyservice.CompanyModel{DB: hm.DB}
+	var translation = translationservice.TranslationsModel{DB: hm.DB}
+	var users = userservice.UserModel{DB: hm.DB}
 
 	translations, err := translation.Get("loginpage")
 	if err != nil {
@@ -114,7 +81,7 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 	if len(v.Login) > 0 && len(v.Password) > 0 {
 
-		// НЕПРАВИЛЬНОЕ ОПИСАНИЕ ОШИБКИ ИСПРАВИТЬ 
+		// НЕПРАВИЛЬНОЕ ОПИСАНИЕ ОШИБКИ ИСПРАВИТЬ
 		company, err := companies.GetCompanyByHostName(host)
 		if err != nil {
 			json.NewEncoder(w).Encode(response{
@@ -127,7 +94,7 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 		user, err := users.GetByNameAndCompanyId(v.Login, company.CompanyId)
 
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if err == pgx.ErrNoRows {
 				log.Printf("User is not exists with error: %s", err)
 				json.NewEncoder(w).Encode(response{
 					Status:  "error",
@@ -154,7 +121,7 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 
-			session, _ := h.CookieStore.Get(r, "session-key")
+			session, _ := hm.CookieStore.Get(r, "session-key")
 			session.Values["authenticated"] = true
 			session.Values["userid"] = user.Id
 			session.Values["companyid"] = company.CompanyId
@@ -181,6 +148,11 @@ func (h *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hm *HandlersModel) logout(w http.ResponseWriter, r *http.Request) {
+	println("logout")
+	if r.Method != http.MethodGet {
+		http.Error(w, "Internal Server Error", 500)
+	}
+
 	session, _ := hm.CookieStore.Get(r, "session-key")
 	session.Values["authenticated"] = false
 	session.Options.MaxAge = -1

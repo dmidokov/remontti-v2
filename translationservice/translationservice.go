@@ -3,10 +3,10 @@ package translationservice
 import (
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/jackc/pgx/v4"
+	"log"
+	"time"
 )
 
 type TranslationsModel struct {
@@ -21,6 +21,27 @@ type Translation struct {
 	Ru       string
 	En       string
 	EditTime int
+}
+
+type TranslationsMemCache struct {
+	Time   int64
+	Result []*Translation
+}
+
+var MemCache = map[string]*TranslationsMemCache{}
+
+func (t *TranslationsModel) Push(pagenames string, sliceOfTranslations []*Translation) {
+	MemCache[pagenames] = &TranslationsMemCache{
+		Time:   time.Now().Unix(),
+		Result: sliceOfTranslations,
+	}
+}
+func (t *TranslationsModel) Pop(pagenames string) *TranslationsMemCache {
+	if v, b := MemCache[pagenames]; b == true && time.Now().Unix()-v.Time < 10 {
+		return MemCache[pagenames]
+	} else {
+		return nil
+	}
 }
 
 // Get Закешировать

@@ -79,6 +79,8 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 		&translationservice.Translation{Name: "loginpage", Label: "ErrorTryAgain", Ru: "Ошибка, попробуйте еще раз", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "loginpage", Label: "InvalidUserOrPassword", Ru: "Неверный логин или пароль", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "loginpage", Label: "EmptyLoginOrPassword", Ru: "Логин или пароль не указаны", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "loginpage", Label: "LoginIsEmpty", Ru: "Не указан логин", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "loginpage", Label: "PasswordIsEmpty", Ru: "Не указан пароль", En: "", EditTime: 0},
 	}
 
 	var mainpage = translationsList{

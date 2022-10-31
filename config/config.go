@@ -61,6 +61,10 @@ func LoadConfig() (*Configuration, error) {
 		}
 	}
 
+	if config.MODE, exist = os.LookupEnv(MODE); !exist || !(config.MODE == "dev" || config.MODE == "production" || config.MODE == "mock") {
+		return &Configuration{}, errors.New("MODE is not exist")
+	}
+
 	// Возвращаем конфиг если не вышли ранее с ошибкой
 	return &config, nil
 }
