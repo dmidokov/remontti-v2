@@ -11,6 +11,7 @@ const (
 	ADMIN_PASSWORD             = "ADMIN_PASSWORD"
 	SESSION_SECRET             = "SESSION_SECRET"
 	DELETE_TABLES_BEFORE_START = "DELETE_TABLES_BEFORE_START"
+	MODE                       = "MODE"
 )
 
 // Структура для хранения конфигруации
@@ -24,4 +25,5 @@ type Configuration struct {
 	ADMIN_PASSWORD             string
 	SESSIONS_SECRET            string
 	DELETE_TABLES_BEFORE_START int
+	MODE                       string
 }

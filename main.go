@@ -1,12 +1,13 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
+	"errors"
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/dmidokov/remontti-v2/database"
 	"github.com/dmidokov/remontti-v2/handlers"
+	"github.com/gorilla/mux"
+	"log"
+	"net/http"
 
 	"github.com/gorilla/sessions"
 )
@@ -52,7 +53,16 @@ func main() {
 
 	// Регистрируем обработчики получаем роутер
 	log.Print("Регистрация обработчиком запросов")
-	router443, err := handler.Router()
+	var router *mux.Router
+
+	if config.MODE == "production" {
+		router, err = handler.Router(false)
+	} else if config.MODE == "dev" {
+		router, err = handler.Router(true)
+	} else {
+		router, err = nil, errors.New("Неизвестный режим запуска")
+	}
+
 	if err != nil {
 		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
 	}
@@ -63,9 +73,9 @@ func main() {
 		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
 	}
 
-	// Запускаем лиснер
+	// Запускаем лиснеры
 	go func() {
-		log.Fatal(http.ListenAndServeTLS(":443", "secrets/localhost2.crt", "secrets/localhost2.key", router443))
+		log.Fatal(http.ListenAndServeTLS(":443", "secrets/localhost2.crt", "secrets/localhost2.key", router))
 	}()
 
 	go func() {
