@@ -7,7 +7,6 @@ import (
 	"github.com/dmidokov/remontti-v2/userservice"
 	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"net/http"
 )
 
@@ -46,6 +45,8 @@ func (hm *HandlersModel) login(w http.ResponseWriter, r *http.Request) {
 
 func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
+	var log = hm.Logger
+
 	if hm.Config.MODE == "dev" {
 		setCorsHeaders(&w, r)
 	}
@@ -71,11 +72,17 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		log.Printf("Invalid data: %s", err)
-		json.NewEncoder(w).Encode(response{
+		log.Warning("Не удалось декодировать JSON: %s", err)
+		err := json.NewEncoder(w).Encode(response{
 			Status:  "error",
 			Message: pageData.Translation["InvalidData"],
 			Errors:  []string{"Invalid data"}})
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+
 		return
 	}
 
@@ -84,10 +91,17 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 		// НЕПРАВИЛЬНОЕ ОПИСАНИЕ ОШИБКИ ИСПРАВИТЬ
 		company, err := companies.GetCompanyByHostName(host)
 		if err != nil {
-			json.NewEncoder(w).Encode(response{
+			log.Warning("Компании не найдены: %s", err)
+			err := json.NewEncoder(w).Encode(response{
 				Status:  "error",
 				Message: pageData.Translation["ErrorTryAgain"],
 				Errors:  []string{"Internal server error"}})
+
+			if err != nil {
+				log.Error("Не удалось кодировать JSON: %s", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+
 			return
 		}
 
@@ -95,29 +109,47 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			if err == pgx.ErrNoRows {
-				log.Printf("User is not exists with error: %s", err)
-				json.NewEncoder(w).Encode(response{
+				log.Warning("Пользователь не найден: %s", err)
+				err := json.NewEncoder(w).Encode(response{
 					Status:  "error",
 					Message: pageData.Translation["UserIsNotExists"],
 					Errors:  []string{"User is not exists"}})
+
+				if err != nil {
+					log.Error("Не удалось кодировать JSON: %s", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				}
+
 				return
 			}
-			log.Printf("Error scaning user password from DB response with error: %s", err)
-			json.NewEncoder(w).Encode(response{
+			log.Error("Ошибка при получении пользовательских данных: %s", err)
+			err := json.NewEncoder(w).Encode(response{
 				Status:  "error",
 				Message: pageData.Translation["ErrorTryAgain"],
 				Errors:  []string{"Internal server error"}})
+
+			if err != nil {
+				log.Error("Не удалось кодировать JSON: %s", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(v.Password))
 
 		if err != nil {
-			log.Printf("Invalid password: %s", err)
-			json.NewEncoder(w).Encode(response{
+			log.Warning("Неверный пароль: %s", err)
+			err := json.NewEncoder(w).Encode(response{
 				Status:  "error",
 				Message: pageData.Translation["InvalidUserOrPassword"],
 				Errors:  []string{"Invalid password"}})
+
+			if err != nil {
+				log.Error("Не удалось кодировать JSON: %s", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+
 			return
 		} else {
 
@@ -126,37 +158,71 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 			session.Values["userid"] = user.Id
 			session.Values["companyid"] = company.CompanyId
 			session.Options.MaxAge = 3600
-			session.Save(r, w)
+			err := session.Save(r, w)
 
-			json.NewEncoder(w).Encode(response{
+			if err != nil {
+				err := json.NewEncoder(w).Encode(response{
+					Status:  "error",
+					Message: pageData.Translation["ErrorTryAgain"],
+					Errors:  []string{"Internal server error"}})
+
+				if err != nil {
+					log.Error("Не удалось кодировать JSON: %s", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				}
+
+				return
+			}
+
+			err = json.NewEncoder(w).Encode(response{
 				Status: "ok",
 				Errors: []string{},
 			})
+
+			if err != nil {
+				log.Error("Не удалось кодировать JSON: %s", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
 
 			return
 		}
 
 	} else {
-		log.Printf("Login or password is empty")
-		json.NewEncoder(w).Encode(response{
+		log.Warning("Логин или пароль пустой")
+		err := json.NewEncoder(w).Encode(response{
 			Status:  "error",
 			Message: pageData.Translation["EmptyLoginOrPassword"],
 			Errors:  []string{"Login or password is empty"}})
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 		return
 	}
 
 }
 
 func (hm *HandlersModel) logout(w http.ResponseWriter, r *http.Request) {
-	println("logout")
+
+	var log = hm.Logger
+
+	log.Info("Логаут")
+
 	if r.Method != http.MethodGet {
+		log.Error("Неверный метод")
 		http.Error(w, "Internal Server Error", 500)
 	}
 
 	session, _ := hm.CookieStore.Get(r, "session-key")
 	session.Values["authenticated"] = false
 	session.Options.MaxAge = -1
-	session.Save(r, w)
+	err := session.Save(r, w)
+
+	if err != nil {
+		log.Error("Не удалось сохранить данные сессии %s", err)
+		http.Error(w, "Internal Server Error", 500)
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
