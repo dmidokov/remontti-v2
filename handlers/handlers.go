@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/dmidokov/remontti-v2/config"
@@ -18,6 +19,7 @@ type HandlersModel struct {
 	DB          *pgx.Conn
 	Config      *config.Configuration
 	CookieStore *sessions.CookieStore
+	Logger      *logrus.Logger
 }
 
 type response struct {
@@ -26,11 +28,12 @@ type response struct {
 	Message string   `json:"message" `
 }
 
-func New(db *pgx.Conn, cfg *config.Configuration, cookieStore *sessions.CookieStore) *HandlersModel {
+func New(db *pgx.Conn, cfg *config.Configuration, cookieStore *sessions.CookieStore, log *logrus.Logger) *HandlersModel {
 	return &HandlersModel{
 		DB:          db,
 		Config:      cfg,
 		CookieStore: cookieStore,
+		Logger:      log,
 	}
 }
 

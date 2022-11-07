@@ -6,21 +6,26 @@ import (
 	"github.com/dmidokov/remontti-v2/database"
 	"github.com/dmidokov/remontti-v2/handlers"
 	"github.com/gorilla/mux"
-	"log"
-	"net/http"
-
 	"github.com/gorilla/sessions"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"os"
 )
 
 func main() {
 
+	var log = &logrus.Logger{
+		Out:          os.Stdout,
+		Formatter:    new(logrus.TextFormatter),
+		Hooks:        make(logrus.LevelHooks),
+		Level:        logrus.DebugLevel,
+		ReportCaller: true,
+	}
+	log.Formatter.(*logrus.TextFormatter).DisableTimestamp = false
+
 	finish := make(chan bool)
-
-	log.Print("Запуск сервиса...")
-
 	// Пытаемся загрузить конфигурацию
 	// Если нет выходим с ошибкой
-	log.Print("Загрузка конфигурации")
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -28,7 +33,7 @@ func main() {
 
 	// Подключаемся в БД, параметры подключения берем из конфигурации
 	// Если нет выходим с ошибкой
-	log.Print("Подключение к БД")
+	log.Info("Подключение к БД")
 	conn, err := database.ConnectToDB(
 		config.DB_HOST,
 		config.DB_PORT,
@@ -39,20 +44,20 @@ func main() {
 		log.Fatalf("Подключение завершилось с ошибкой : %s", err)
 	}
 
-	log.Print("Подготовка хранилища сесссий")
+	log.Info("Подготовка хранилища сесссий")
 	store := sessions.NewCookieStore([]byte(config.SESSIONS_SECRET))
 
-	handler := handlers.New(conn, config, store)
-	database := &database.DatabaseModel{DB: conn}
+	handler := handlers.New(conn, config, store, log)
+	db := &database.DatabaseModel{DB: conn, Logger: log}
 
-	log.Print("Подкотовка БД")
-	err = database.Prepare(config)
+	log.Info("Подготовка БД")
+	err = db.Prepare(config)
 	if err != nil {
 		log.Fatalf("Подготовка завершилась с ошибкой: %s", err)
 	}
 
 	// Регистрируем обработчики получаем роутер
-	log.Print("Регистрация обработчиком запросов")
+	log.Info("Регистрация обработчиков запросов")
 	var router *mux.Router
 
 	if config.MODE == "production" {
@@ -67,7 +72,7 @@ func main() {
 		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
 	}
 
-	log.Print("Сервис запущен и готов к приему запросов")
+	log.Info("Сервис запущен и готов к приему запросов")
 
 	if err != nil {
 		log.Fatalf("Регистрация завершилась с ошибкой: %s", err)
