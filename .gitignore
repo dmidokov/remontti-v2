@@ -4,3 +4,4 @@ secrets
 /web/scripts/vue*
 .idea
 /web/vueui/node_modules/.yarn-integrity
+log*

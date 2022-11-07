@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/dmidokov/remontti-v2/companyservice"
@@ -17,7 +17,8 @@ import (
 )
 
 type DatabaseModel struct {
-	DB *pgx.Conn
+	DB     *pgx.Conn
+	Logger *logrus.Logger
 }
 
 func ConnectToDB(dbHost, dbPort, dbUser, dbPassword, dbName string) (*pgx.Conn, error) {
@@ -42,6 +43,8 @@ func ConnectToDB(dbHost, dbPort, dbUser, dbPassword, dbName string) (*pgx.Conn, 
 
 // Подготавка БД к работе
 func (pg *DatabaseModel) Prepare(cfg *config.Configuration) error {
+
+	var log = pg.Logger
 
 	if cfg.DELETE_TABLES_BEFORE_START == 1 {
 		log.Print("Пересоздание схемы")
