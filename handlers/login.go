@@ -32,6 +32,7 @@ func (hm *HandlersModel) login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		hm.loginPOST(w, r)
 	} else {
+		// TODO: проверить используется ли этот кусок?
 		if hm.Config.MODE == "dev" {
 			if r.Method == "OPTIONS" {
 				setCorsHeaders(&w, r)

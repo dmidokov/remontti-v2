@@ -2,6 +2,7 @@ import {createApp} from 'vue'
 // TODO: вынести стили тоже
 import '../src/assets/style.css'
 import '../src/assets/variables.css'
+import './login.css'
 import App from './App.vue'
 import router from './../router'
 

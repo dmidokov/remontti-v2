@@ -1,6 +1,7 @@
 <script>
 
 import * as requests from '../scripts/requests.js'
+import {getTranslations} from '../scripts/translations.js'
 
 export default {
   name: "Login",
@@ -17,12 +18,12 @@ export default {
   },
   methods: {
     async auth(loginField, passwordField) {
-      if (loginField == "") {
-        this.errorMessage = this.getTranslations("LoginIsEmpty")
+      if (loginField === "") {
+        this.errorMessage = getTranslations(this.translations, "LoginIsEmpty")
         return
       }
       if (passwordField == "" && passwordField.length < 5) {
-        this.errorMessage = this.getTranslations("PasswordIsEmpty")
+        this.errorMessage = getTranslations(this.translations,"PasswordIsEmpty")
         return
       }
 
@@ -30,7 +31,7 @@ export default {
         login: loginField, password: passwordField
       }
 
-      let response = await requests.fetchPostRequestWithJsonBody("/login", user)
+      let response = await requests.post("/login", user)
 
       if (response.error == null) {
         if (response.data.status === "error") {
@@ -40,13 +41,10 @@ export default {
         }
       }
     },
-    getTranslations(label) {
-      if (this.translations === undefined) {
-        return ""
-      } else {
-        return this.translations[label]
-      }
+    getTranslations(t,l) {
+      return getTranslations(t,l)
     }
+
   }
 
 }
@@ -57,14 +55,14 @@ export default {
   <div>
     <div class="modal">
       <div>
-        <input type="text" id="login" v-model="login" :placeholder='getTranslations("LoginFieldHeader")'>
+        <input type="text" id="login" v-model="login" :placeholder='getTranslations(this.translations, "LoginFieldHeader")'>
       </div>
       <div>
-        <input type="password" id="password" v-model="password" :placeholder='getTranslations("PasswordFieldHeader")'>
+        <input type="password" id="password" v-model="password" :placeholder='getTranslations(this.translations,"PasswordFieldHeader")'>
       </div>
       <div class="sign-in-button">
         <button @click="auth(login, password)">
-          {{ getTranslations("SignIn") }}
+          {{ getTranslations(this.translations, "SignIn") }}
         </button>
         <div class="error-message">
           {{ errorMessage }}
@@ -92,8 +90,6 @@ div {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  -webkit-box-shadow: 0px 0px 16px 2px rgba(34, 60, 80, 0.24);
-  -moz-box-shadow: 0px 0px 16px 2px rgba(34, 60, 80, 0.24);
   box-shadow: 0px 0px 16px 2px rgba(34, 60, 80, 0.24);
   border-radius: 10px;
 }

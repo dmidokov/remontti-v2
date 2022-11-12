@@ -15,7 +15,7 @@ type permissionsList []*permissionservice.Permissons
 type translationsList []*translationservice.Translation
 type companiesList []*companyservice.Company
 
-func GetCompaniesDataToInsert(cfg *config.Configuration) companiesList {
+func GetCompaniesDataToInsert() companiesList {
 	return companiesList{
 		&companyservice.Company{CompanyId: 0, CompanyName: "CONTROL", HostName: "control.remontti.site", EditTime: 0},
 	}
@@ -85,6 +85,9 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 
 	var mainpage = translationsList{
 		&translationservice.Translation{Name: "mainpage", Label: "Title", Ru: "Главная", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "mainpage", Label: "Account", Ru: "Личный кабинет", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "mainpage", Label: "Settings", Ru: "Настройки", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "mainpage", Label: "Logout", Ru: "Выход", En: "", EditTime: 0},
 	}
 
 	var navigation = translationsList{

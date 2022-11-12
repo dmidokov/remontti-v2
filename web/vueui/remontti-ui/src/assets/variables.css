@@ -9,4 +9,13 @@
 
     --input-background: #f0f2f5;
 
+    --light-gray: #c7c7c7;
+
+    --drop-down-background: #f3f3f3;
+    --drop-down-text-color: #4d4d4d;
+    --drop-down-text-hover-color: #ffffff;
+    --drop-down-item-hover-color: #818181;
+
+    --box-shadow-offset-0:0px 0px 12px 5px rgba(34, 60, 80, 0.2);
+
 }
