@@ -3,7 +3,9 @@ package userservice
 import (
 	"context"
 	"errors"
+	"github.com/gorilla/sessions"
 	"log"
+	"net/http"
 
 	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -19,14 +21,23 @@ type User struct {
 }
 
 type UserModel struct {
-	DB *pgx.Conn
+	DB          *pgx.Conn
+	CookieStore *sessions.CookieStore
 }
 
 // Ошибка ErrUserAlreadyExists возвращается при попытке создать
 // пользователя который уже существует в системе
 var ErrUserAlreadyExists = errors.New("users: User already exists")
 
-// Возвразает пользователя по его userName и companyId
+func (u *UserModel) GetCurrentUserId(r *http.Request, secret string) (int, error) {
+	session, err := u.CookieStore.Get(r, secret)
+	if err != nil {
+		return 0, err
+	}
+	return session.Values["userid"].(int), nil
+}
+
+// Возвращает пользователя по его userName и companyId
 // если пользователь не существует возвращает ошибку ErrNoRows
 func (u *UserModel) GetByNameAndCompanyId(userName string, companyId int) (*User, error) {
 	sql := `SELECT * 
@@ -85,7 +96,7 @@ func (u *UserModel) Create(userName string, password string, companyId int) (*Us
 }
 
 func (u *UserModel) GetAll() ([]*User, error) {
-	
+
 	sql := `SELECT * FROM remonttiv2.users WHERE 1=1;`
 
 	rows, err := u.DB.Query(context.Background(), sql)

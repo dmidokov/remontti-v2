@@ -80,7 +80,7 @@ func (p *PermissionModel) GetByComponentIdAndUserId(component_id, user_id int) (
 
 // GetById Возвращает Разрешения по их идентификатору
 func (p *PermissionModel) GetById(id int) (*Permissons, error) {
-	sql := "SELECT * FROM remonttiv2.permissions WHERE permisson_id=$1"
+	sql := "SELECT * FROM remonttiv2.permissions WHERE permission_id=$1"
 	row := p.DB.QueryRow(context.Background(), sql, id)
 
 	return rowProcessing(row)
@@ -109,7 +109,7 @@ func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissons, er
 
 	if permission != nil {
 
-		sql := "UPDATE remonttiv2.permissions SET actions=$1, edit_date=$2 WHERE component_id=$3 AND user_id=$4"
+		sql := "UPDATE remonttiv2.permissions SET actions=$1, edit_time=$2 WHERE component_id=$3 AND user_id=$4"
 		_, err = p.DB.Exec(context.Background(), sql, actions, time.Now().Unix(), componentId, userId)
 		if err != nil {
 			return nil, err
@@ -118,7 +118,7 @@ func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissons, er
 
 	} else {
 
-		sql := "INSERT INTO remonttiv2.permissions (component_id, user_id, actions, edit_date) VALUES ($1, $2, $3, $4)"
+		sql := "INSERT INTO remonttiv2.permissions (component_id, user_id, actions, edit_time) VALUES ($1, $2, $3, $4)"
 		_, err = p.DB.Exec(context.Background(), sql, componentId, userId, actions, time.Now().Unix())
 
 		if err != nil {

@@ -36,7 +36,7 @@ func (hm *HandlersModel) getUserNavigation(userId int, translation map[string]st
 }
 
 func (hm *HandlersModel) getSessionData(r *http.Request) (*SessionData, error) {
-	session, _ := hm.CookieStore.Get(r, "session-key")
+	session, _ := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
 
 	userId, exist := session.Values["userid"].(int)
 	if !exist {

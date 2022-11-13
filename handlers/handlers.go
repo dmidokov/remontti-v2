@@ -60,9 +60,16 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 		methods = append(methods, http.MethodOptions)
 	}
 
-	router.HandleFunc("/login", hm.loginPOST).Methods(methods...)
-	router.HandleFunc("/logout", hm.logout).Methods(methods...)
-	router.HandleFunc("/api/v1/translations/get", hm.getTranslationsApi).Methods(methods...)
+	router.HandleFunc("/login", hm.loginPOST).Methods(http.MethodPost)
+	router.HandleFunc("/logout", hm.logout).Methods(http.MethodGet)
+	//TODO: подумать как иначе обобщить обращения к апи, чтобы не плодить миллион хендлеров можно подумать в сторону обработки
+	// общих эндпоинтов типа
+	// /api/v1/translations/
+	// /api/v1/navigation
+	// /api/v1/companies/
+	// и внутри разбирать запросы или даже на уровне версии апи
+	router.HandleFunc("/api/v1/translations/get", hm.getTranslationsApi).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/navigation/get", hm.auth1(hm.getNavigationApi)).Methods(http.MethodGet)
 
 	return router, nil
 }

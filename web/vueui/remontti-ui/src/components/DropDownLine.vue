@@ -1,7 +1,7 @@
 <template>
   <div @click.stop class="dropdown-line">
     <a v-if="link !== undefined" :href=link>{{ title }}</a>
-    <span v-else>{{title}}</span>
+    <span v-else>{{ title }}</span>
   </div>
 </template>
 
@@ -17,7 +17,7 @@ export default {
   font-size: 18px;
   padding: 6px 20px;
   cursor: pointer;
-  color : var(--drop-down-text-color);
+  color: var(--drop-down-text-color);
   display: flex;
   justify-content: center;
   text-align: right;
@@ -31,8 +31,8 @@ export default {
 }
 
 a {
- color: inherit;
-  font-weight:inherit;
+  color: inherit;
+  font-weight: inherit;
 }
 
 
