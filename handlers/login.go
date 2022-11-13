@@ -154,7 +154,7 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 
-			session, _ := hm.CookieStore.Get(r, "session-key")
+			session, _ := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
 			session.Values["authenticated"] = true
 			session.Values["userid"] = user.Id
 			session.Values["companyid"] = company.CompanyId
@@ -215,7 +215,7 @@ func (hm *HandlersModel) logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", 500)
 	}
 
-	session, _ := hm.CookieStore.Get(r, "session-key")
+	session, _ := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
 	session.Values["authenticated"] = false
 	session.Options.MaxAge = -1
 	err := session.Save(r, w)

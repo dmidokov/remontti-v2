@@ -338,7 +338,7 @@ func (pg *DatabaseModel) insertCompaniesData(cfg *config.Configuration) error {
 
 	var batch *pgx.Batch = &pgx.Batch{}
 
-	companiesData := GetCompaniesDataToInsert(cfg)
+	companiesData := GetCompaniesDataToInsert()
 
 	allCompanies, err := companyservice.GetAll()
 	if err != nil {

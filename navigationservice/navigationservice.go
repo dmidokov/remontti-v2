@@ -92,9 +92,10 @@ func (n *NavigationModel) GetAllForUser(userId int) ([]*NavigationItem, error) {
 				remonttiv2.navigation, remonttiv2.permissions 
 			WHERE 
 				remonttiv2.navigation.id = remonttiv2.permissions.component_id AND
-				(remonttiv2.permissions.actions & $1) = $1;`
+				(remonttiv2.permissions.actions & $1) = $1 AND
+				remonttiv2.permissions.user_id = $2;`
 
-	rows, err := n.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW)
+	rows, err := n.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW, userId)
 	if err != nil {
 		return nil, err
 	}

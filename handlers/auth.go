@@ -7,7 +7,7 @@ import (
 
 func (hm *HandlersModel) auth(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := hm.CookieStore.Get(r, "session-key")
+		session, err := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Internal Server Error", 500)
@@ -25,7 +25,7 @@ func (hm *HandlersModel) auth(f http.HandlerFunc) http.HandlerFunc {
 
 func (hm *HandlersModel) auth1(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := hm.CookieStore.Get(r, "session-key")
+		session, err := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Internal Server Error", 500)
