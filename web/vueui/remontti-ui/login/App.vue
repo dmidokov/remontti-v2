@@ -58,7 +58,7 @@ export default {
         <input type="text" id="login" v-model="login" :placeholder='getTranslations(this.translations, "LoginFieldHeader")'>
       </div>
       <div>
-        <input type="password" id="password" v-model="password" :placeholder='getTranslations(this.translations,"PasswordFieldHeader")'>
+        <input @keydown.enter="auth(login, password)" type="password" id="password" v-model="password" :placeholder='getTranslations(this.translations,"PasswordFieldHeader")'>
       </div>
       <div class="sign-in-button">
         <button @click="auth(login, password)">

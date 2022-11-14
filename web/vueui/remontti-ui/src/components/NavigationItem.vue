@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a :href="link">{{ getTranslate(label) }}</a>
+    <a :class="{ 'current-page':isCurrentPage}" :href="link">{{ getTranslate(label) }}</a>
   </div>
 </template>
 
@@ -15,6 +15,11 @@ export default {
       return getTranslations(this.translate, label)
     }
   },
+  data() {
+    return {
+      isCurrentPage : window.location.pathname == this.link ? true : false,
+    }
+  },
 }
 </script>
 
@@ -25,11 +30,15 @@ a {
 }
 
 a:hover {
-  color : var(--link-hover-color);
+  color: var(--link-hover-color);
 }
 
 div {
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.current-page {
+  font-weight: bold;
 }
 </style>

@@ -10,7 +10,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         // nested: resolve(__dirname, '/nested/index.html'),
-        login: resolve(__dirname, '/login/index.html')
+        login: resolve(__dirname, '/login/index.html'),
+        companies: resolve(__dirname, '/companies/index.html'),
       }
     }
   }
