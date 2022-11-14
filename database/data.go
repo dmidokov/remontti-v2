@@ -32,19 +32,19 @@ func GetUserDataToInsert(cfg *config.Configuration) usersList {
 func GetNavigationDataToInsert(cfg *config.Configuration) navigationList {
 
 	return navigationList{
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/settings", Label: "Settings", EditTime: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/", Label: "Home", EditTime: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/companies/", Label: "Companies", EditTime: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/settings/", Label: "Settings", EditTime: 0},
 		&navigationservice.NavigationItem{Item_type: 1, Link: "/logout", Label: "Logout", EditTime: 0},
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/home", Label: "Home", EditTime: 0},
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/companies", Label: "Companies", EditTime: 0},
 	}
 
 }
 
 func (pg *DatabaseModel) GetPermissionsDataToInsert(cfg *config.Configuration) (permissionsList, error) {
-	var userservice userservice.UserModel = userservice.UserModel{DB: pg.DB}
+	var userService userservice.UserModel = userservice.UserModel{DB: pg.DB}
 	var navigationservice navigationservice.NavigationModel = navigationservice.NavigationModel{DB: pg.DB}
 
-	user, err := userservice.GetByNameAndCompanyId("admin", 0)
+	user, err := userService.GetByNameAndCompanyId("admin", 0)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +97,7 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 		&translationservice.Translation{Name: "navigation", Label: "Settings", Ru: "Настройки", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "Home", Ru: "Главная", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "Companies", Ru: "Организации", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "Account", Ru: "Личный кабинет", En: "", EditTime: 0},
 	}
 
 	var companies = translationsList{

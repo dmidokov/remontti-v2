@@ -12,21 +12,20 @@
 <script>
 import NavigationItem from "./NavigationItem.vue";
 import * as requests from "../../scripts/requests.js";
+import {computed} from "vue";
 
 export default {
   name: "CenterHeaderBlock",
   components: {NavigationItem},
   data() {
     return {
-      translations : {}
+      translations :  computed(() => this.translations),
     }
   },
   props: [
-    'navigation'
+    'navigation',
+    'translations'
   ],
-  async beforeCreate() {
-    this.translations = (await requests.get("/api/v1/translations/get?pages=navigation")).data
-  }
 }
 </script>
 

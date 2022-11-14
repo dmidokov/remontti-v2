@@ -9,4 +9,4 @@ export SESSION_SECRET=<session_secrec_key>
 export DELETE_TABLES_BEFORE_START=<0||1>
 export MODE=dev
 
-go run ./main.go #>> $ROOT_PATH/log 2>&1
+go run ./main.go >> $ROOT_PATH/log 2>&1
