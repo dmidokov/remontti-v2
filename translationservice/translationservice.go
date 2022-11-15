@@ -23,32 +23,37 @@ type Translation struct {
 	EditTime int
 }
 
+const CACHE_TTL = 60
+
 type TranslationsMemCache struct {
 	Time   int64
 	Result []*Translation
 }
+type MemCacheKey uint
 
-var MemCache = map[string]*TranslationsMemCache{}
+var MemCache = map[MemCacheKey]*TranslationsMemCache{}
 
-func (t *TranslationsModel) Push(pagenames string, sliceOfTranslations []*Translation) {
-	MemCache[pagenames] = &TranslationsMemCache{
+func (t *TranslationsModel) Push(pageNames string, sliceOfTranslations []*Translation) {
+	hash := hash(pageNames)
+	MemCache[hash] = &TranslationsMemCache{
 		Time:   time.Now().Unix(),
 		Result: sliceOfTranslations,
 	}
 }
-func (t *TranslationsModel) Pop(pagenames string) *TranslationsMemCache {
-	if v, b := MemCache[pagenames]; b == true && time.Now().Unix()-v.Time < 10 {
-		return MemCache[pagenames]
+func (t *TranslationsModel) Pop(pageNames string) *TranslationsMemCache {
+	hash := hash(pageNames)
+	if v, b := MemCache[hash]; b == true && time.Now().Unix()-v.Time < CACHE_TTL {
+		return MemCache[hash]
 	} else {
 		return nil
 	}
 }
 
 // Get Закешировать
-func (t *TranslationsModel) Get(pagenames ...string) ([]*Translation, error) {
+func (t *TranslationsModel) Get(pageNames ...string) ([]*Translation, error) {
 
-	sql := `SELECT * FROM remonttiv2.translations WHERE `
-	for i, name := range pagenames {
+	sql := `SELECT * FROM remonttiv2.translations WHERE true`
+	for i, name := range pageNames {
 		if i > 0 {
 			sql += " OR "
 		}
@@ -67,7 +72,7 @@ func (t *TranslationsModel) Get(pagenames ...string) ([]*Translation, error) {
 
 func (t *TranslationsModel) GetAll() ([]*Translation, error) {
 
-	sql := `SELECT * FROM remonttiv2.translations WHERE 1=1`
+	sql := `SELECT * FROM remonttiv2.translations WHERE true`
 
 	rows, err := t.DB.Query(context.Background(), sql)
 	if err != nil {
@@ -95,4 +100,18 @@ func rowsProcessing(rows pgx.Rows) ([]*Translation, error) {
 	}
 
 	return result, nil
+}
+
+func hash(str string) MemCacheKey {
+	var k MemCacheKey = 67
+	var mod MemCacheKey = 1e9 + 7
+	var h MemCacheKey = 0
+	var m MemCacheKey = 1
+
+	for _, v := range str {
+		var x = MemCacheKey(v - 96)
+		h = (h + m*x) % mod
+		m = (h * k) % mod
+	}
+	return h
 }
