@@ -1,15 +1,14 @@
 package handlers
 
 import (
-	"fmt"
-	"github.com/jackc/pgx/v4"
-	"github.com/sirupsen/logrus"
-	"net/http"
-
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/jackc/pgx/v4"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
+	_ "image/jpeg"
+	"net/http"
 )
 
 // Переменная уровня пакета, используется для
@@ -51,8 +50,6 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 
 	router.HandleFunc("/{file}.{file}", handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", "")).Methods(http.MethodGet)
 
-	router.HandleFunc("/login/", handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", "")).Methods(http.MethodGet)
-
 	var methods []string
 	methods = append(methods, http.MethodPost)
 	methods = append(methods, http.MethodGet)
@@ -74,10 +71,6 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 	return router, nil
 }
 
-func settings(w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprint(w, "Hello! Request was processed settings")
-}
-
 func Redirect(w http.ResponseWriter, r *http.Request) {
 	target := "https://" + r.Host + r.URL.Path
 	http.Redirect(w, r, target, http.StatusMovedPermanently)
@@ -91,7 +84,7 @@ func handleFileServer(dir, prefix string) http.HandlerFunc {
 	}
 }
 
-func setCorsHeaders(w *http.ResponseWriter, req *http.Request) {
+func setCorsHeaders(w *http.ResponseWriter, _ *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization")
