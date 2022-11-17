@@ -4,7 +4,7 @@ import (
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	_ "image/jpeg"
@@ -15,7 +15,7 @@ import (
 // передачи конфигурации в функции обработчики
 
 type HandlersModel struct {
-	DB          *pgx.Conn
+	DB          *pgxpool.Pool
 	Config      *config.Configuration
 	CookieStore *sessions.CookieStore
 	Logger      *logrus.Logger
@@ -27,7 +27,7 @@ type response struct {
 	Message string   `json:"message" `
 }
 
-func New(db *pgx.Conn, cfg *config.Configuration, cookieStore *sessions.CookieStore, log *logrus.Logger) *HandlersModel {
+func New(db *pgxpool.Pool, cfg *config.Configuration, cookieStore *sessions.CookieStore, log *logrus.Logger) *HandlersModel {
 	return &HandlersModel{
 		DB:          db,
 		Config:      cfg,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/gorilla/sessions"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 
@@ -21,7 +22,7 @@ type User struct {
 }
 
 type UserModel struct {
-	DB          *pgx.Conn
+	DB          *pgxpool.Pool
 	CookieStore *sessions.CookieStore
 }
 

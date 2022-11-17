@@ -16,12 +16,12 @@ func main() {
 
 	var log = &logrus.Logger{
 		Out:          os.Stdout,
-		Formatter:    new(logrus.TextFormatter),
+		Formatter:    new(logrus.JSONFormatter),
 		Hooks:        make(logrus.LevelHooks),
 		Level:        logrus.DebugLevel,
 		ReportCaller: true,
 	}
-	log.Formatter.(*logrus.TextFormatter).DisableTimestamp = false
+	log.Formatter.(*logrus.JSONFormatter).DisableTimestamp = false
 
 	finish := make(chan bool)
 	// Пытаемся загрузить конфигурацию

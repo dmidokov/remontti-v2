@@ -3,6 +3,7 @@ package permissionservice
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
 
@@ -22,7 +23,7 @@ var Actions = &ActionsStruct{
 }
 
 type PermissionModel struct {
-	DB *pgx.Conn
+	DB *pgxpool.Pool
 }
 
 type Permissons struct {

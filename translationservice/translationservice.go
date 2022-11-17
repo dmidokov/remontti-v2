@@ -2,15 +2,17 @@ package translationservice
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
 )
 
 type TranslationsModel struct {
-	DB     *pgx.Conn
+	DB     *pgxpool.Pool
 	Config *config.Configuration // Возможно лишнее!!!
 }
 
@@ -23,36 +25,44 @@ type Translation struct {
 	EditTime int
 }
 
-const CACHE_TTL = 60
+const CACHE_TTL = 5
 
 type TranslationsMemCache struct {
-	Time   int64
-	Result []*Translation
+	EditTime int64
+	Result   []*Translation
 }
 type MemCacheKey uint
 
-var MemCache = map[MemCacheKey]*TranslationsMemCache{}
+var memCache = map[MemCacheKey]*TranslationsMemCache{}
 
 func (t *TranslationsModel) Push(pageNames string, sliceOfTranslations []*Translation) {
 	hash := hash(pageNames)
-	MemCache[hash] = &TranslationsMemCache{
-		Time:   time.Now().Unix(),
-		Result: sliceOfTranslations,
+	memCache[hash] = &TranslationsMemCache{
+		EditTime: time.Now().Unix() + CACHE_TTL,
+		Result:   sliceOfTranslations,
 	}
 }
 func (t *TranslationsModel) Pop(pageNames string) *TranslationsMemCache {
 	hash := hash(pageNames)
-	if v, b := MemCache[hash]; b == true && time.Now().Unix()-v.Time < CACHE_TTL {
-		return MemCache[hash]
+	if v, b := memCache[hash]; b == true && time.Now().Unix() < v.EditTime {
+		return memCache[hash]
 	} else {
 		return nil
+	}
+}
+
+func cachePrint(pushOrPop string) {
+	println("======== Cache ", pushOrPop, time.Now().Unix(), "=========")
+	for key, value := range memCache {
+		v, _ := json.Marshal(value)
+		println(key, "=>", string(v))
 	}
 }
 
 // Get Закешировать
 func (t *TranslationsModel) Get(pageNames ...string) ([]*Translation, error) {
 
-	sql := `SELECT * FROM remonttiv2.translations WHERE true`
+	sql := `SELECT * FROM remonttiv2.translations WHERE `
 	for i, name := range pageNames {
 		if i > 0 {
 			sql += " OR "
@@ -72,7 +82,7 @@ func (t *TranslationsModel) Get(pageNames ...string) ([]*Translation, error) {
 
 func (t *TranslationsModel) GetAll() ([]*Translation, error) {
 
-	sql := `SELECT * FROM remonttiv2.translations WHERE true`
+	sql := `SELECT * FROM remonttiv2.translations WHERE 1=1`
 
 	rows, err := t.DB.Query(context.Background(), sql)
 	if err != nil {

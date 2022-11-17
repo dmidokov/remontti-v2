@@ -36,7 +36,6 @@ func (hm *HandlersModel) auth1(f http.HandlerFunc) http.HandlerFunc {
 			session.Save(r, w)
 			f.ServeHTTP(w, r)
 		} else {
-			println("no auth")
 			handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist/login/", r.RequestURI).ServeHTTP(w, r)
 		}
 	}
