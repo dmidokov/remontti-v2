@@ -3,6 +3,7 @@ package navigationservice
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
 
@@ -26,12 +27,12 @@ type NavigationItemInsert struct {
 }
 
 type NavigationModel struct {
-	DB *pgx.Conn
+	DB *pgxpool.Pool
 }
 
 var ErrItemAlreadyExists = errors.New("navigation: Item already exists")
 
-func New(db *pgx.Conn) *NavigationModel {
+func New(db *pgxpool.Pool) *NavigationModel {
 	return &NavigationModel{
 		DB: db,
 	}

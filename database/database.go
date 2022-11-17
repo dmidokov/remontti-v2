@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
 	"time"
 
@@ -17,17 +18,17 @@ import (
 )
 
 type DatabaseModel struct {
-	DB     *pgx.Conn
+	DB     *pgxpool.Pool
 	Logger *logrus.Logger
 }
 
-func ConnectToDB(dbHost, dbPort, dbUser, dbPassword, dbName string) (*pgx.Conn, error) {
+func ConnectToDB(dbHost, dbPort, dbUser, dbPassword, dbName string) (*pgxpool.Pool, error) {
 
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPassword, dbName)
-
-	conn, err := pgx.Connect(context.Background(), psqlInfo)
+	conn, err := pgxpool.Connect(context.Background(), psqlInfo)
+	//conn, err := pgx.Connect(context.Background(), psqlInfo)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package companyservice
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 )
 
 type CompanyModel struct {
-	DB *pgx.Conn
+	DB *pgxpool.Pool
 }
 
 type Company struct {
