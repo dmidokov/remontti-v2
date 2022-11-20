@@ -53,4 +53,8 @@ export default {
   display: flex;
   flex-direction: row;
 }
+
+.right-header div {
+  margin-left: 10px;
+}
 </style>

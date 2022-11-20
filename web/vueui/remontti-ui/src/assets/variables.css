@@ -1,11 +1,21 @@
 :root {
+
+    /*BUTTONS*/
     --button-color-1: #448AFF;
     --button-color-1-light: #568efc;
     --button-color-2: #67C430;
 
     --button-text-color-1: #FAFAFA;
+    --button-modal-close-background: #fd5353;
+    --button-modal-close-background-hover: #fc3535;
+
+
+    --error-popup-block-background: rgba(255, 0, 0, 0.15);
+    --error-popup-block-color: #c54444;
+
 
     --modal-border: rgba(0, 0, 0, 0.2);
+    --modal-background: #eeeeee;
 
     --input-background: #f0f2f5;
 
@@ -16,8 +26,18 @@
     --drop-down-text-hover-color: #ffffff;
     --drop-down-item-hover-color: #818181;
 
-    --box-shadow-offset-0:0px 0px 12px 5px rgba(34, 60, 80, 0.2);
+    --box-shadow-offset-0: 0px 0px 12px 5px rgba(34, 60, 80, 0.2);
 
     --link-hover-color: #448AFF;
+
+    --table-odd-line-bg: rgb(244, 247, 255);
+    --table-odd-line-bg-hover: rgb(110, 163, 255);
+    --table-odd-line-color: rgb(59, 59, 59);
+    --table-odd-line-color-hover: rgb(255, 255, 255);
+    --table-even-line-bg: rgb(238, 239, 255);
+    --table-even-line-bg-hover: rgb(103, 160, 255);
+    --table-even-line-color: rgb(86, 86, 86);
+    --table-even-line-color-hover: rgb(255, 255, 255);
+    --table-first-line-top-border-color : #a1a0a0;
 
 }

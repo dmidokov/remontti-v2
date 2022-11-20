@@ -1,7 +1,7 @@
 <template>
-<div class="header-part">
-  Left
-</div>
+  <div class="header-part">
+    Left
+  </div>
 </template>
 
 <script>

@@ -58,7 +58,8 @@ var CreatePermissionsTableSQL = `
 		component_type character varying(50) NOT NULL,
 		user_id integer NOT NULL,
 		actions integer NOT NULL,
-		edit_time integer NOT NULL
+		edit_time integer NOT NULL,
+		PRIMARY KEY (permission_id)
 	)
 	TABLESPACE pg_default;
 `

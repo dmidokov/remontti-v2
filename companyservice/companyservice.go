@@ -2,6 +2,7 @@ package companyservice
 
 import (
 	"context"
+	"github.com/dmidokov/remontti-v2/permissionservice"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
@@ -100,4 +101,27 @@ func (c *CompanyModel) Add(name, host string) (*Company, error) {
 	row := c.DB.QueryRow(context.Background(), sql, name, host, time)
 
 	return rowProcessing(row)
+}
+
+func (c *CompanyModel) GetAllForUser(userId int) ([]*Company, error) {
+
+	sql := `SELECT 
+    			remonttiv2.companies.company_id, remonttiv2.companies.company_name, 
+    			remonttiv2.companies.host_name, remonttiv2.companies.edit_time 
+			FROM 
+			    remonttiv2.companies, remonttiv2.permissions 
+			WHERE 
+			    remonttiv2.companies.company_id = remonttiv2.permissions.component_id AND
+			    (remonttiv2.permissions.actions & $1) = $1 AND
+			    remonttiv2.permissions.user_id = $2;`
+
+	rows, err := c.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	return rowsProcessing(rows)
+
 }

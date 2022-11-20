@@ -23,7 +23,7 @@ func (hm *HandlersModel) getNavigationApi(w http.ResponseWriter, r *http.Request
 		setCorsHeaders(&w, r)
 	}
 
-	var navigation = navigationservice.NavigationModel{DB: hm.DB}
+	var navigationService = navigationservice.NavigationModel{DB: hm.DB}
 	var userService = userservice.UserModel{DB: hm.DB, CookieStore: hm.CookieStore}
 
 	userId, err := userService.GetCurrentUserId(r, hm.Config.SESSIONS_SECRET)
@@ -40,7 +40,7 @@ func (hm *HandlersModel) getNavigationApi(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	items, err := navigation.GetAllForUser(userId)
+	navigationItems, err := navigationService.GetAllForUser(userId)
 	if err != nil {
 		err := json.NewEncoder(w).Encode(response{
 			Status:  "error",
@@ -54,7 +54,7 @@ func (hm *HandlersModel) getNavigationApi(w http.ResponseWriter, r *http.Request
 	}
 
 	result := make([]*NavigationResult, 0)
-	for _, item := range items {
+	for _, item := range navigationItems {
 		result = append(
 			result,
 			&NavigationResult{Link: item.Link, Label: item.Label},

@@ -30,7 +30,7 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 	pageData.Translation, err = hm.getTranslations("mainpage", "navigation")
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
 	// получаем данные сессии, а иименно
@@ -56,7 +56,7 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 	sessionsData, err := hm.getSessionData(r)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
 	// Получаем навигационное меню, точнее ссылки и переводы
@@ -66,14 +66,14 @@ func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
 	pageData.Navigation, err = hm.getUserNavigation(sessionsData.UserId, pageData.Translation)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
 	// Выполняем шаблон, стоит не забыть закешировать шаблоны в будущем
 	err = ts.Execute(w, pageData)
 	if err != nil {
 		log.Print(err)
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 

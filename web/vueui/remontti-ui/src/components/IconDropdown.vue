@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="icon-with-dropdown-block">
     <div class="icon-with-dropdown">
       <img v-on:click.stop="dropdownToggle" :src="image(src)"/>
       <DropDown v-show="show" :items="items"/>
@@ -53,16 +53,18 @@ img {
   width: 25px;
   height: 25px;
   cursor: pointer;
-  margin-left: 10px;
 }
 
 img:hover {
   transform: scale(1.2);
-  /*box-shadow: var(--box-shadow-offset-0)*/
 }
 
 .icon-with-dropdown {
   position: relative;
+  display: flex;
 }
 
+.icon-with-dropdown-block {
+  display: flex;
+}
 </style>
