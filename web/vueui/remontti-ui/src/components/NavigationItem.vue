@@ -17,7 +17,7 @@ export default {
   },
   data() {
     return {
-      isCurrentPage : window.location.pathname == this.link ? true : false,
+      isCurrentPage: window.location.pathname == this.link ? true : false,
     }
   },
 }
@@ -40,5 +40,6 @@ div {
 
 .current-page {
   font-weight: bold;
+  color: var(--link-hover-color);
 }
 </style>

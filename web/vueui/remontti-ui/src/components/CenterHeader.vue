@@ -11,7 +11,6 @@
 
 <script>
 import NavigationItem from "./NavigationItem.vue";
-import * as requests from "../../scripts/requests.js";
 import {computed} from "vue";
 
 export default {
@@ -19,7 +18,7 @@ export default {
   components: {NavigationItem},
   data() {
     return {
-      translations :  computed(() => this.translations),
+      translations: computed(() => this.translations),
     }
   },
   props: [

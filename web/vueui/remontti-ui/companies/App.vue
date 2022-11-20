@@ -1,6 +1,6 @@
 <script setup>
 import Header from '../src/components/Header.vue'
-import { HollowDotsSpinner } from 'epic-spinners'
+import Companies from "../src/components/Companies.vue";
 </script>
 <script>
 
@@ -22,14 +22,16 @@ export default {
 
 <template>
   <Header v-bind:translations="translations"/>
-  <hollow-dots-spinner
-      :animation-duration="1000"
-      :dot-size="15"
-      :dots-num="3"
-      color="#ff1d5e"
-  />
+  <Companies/>
 </template>
 
 <style scoped>
 
 </style>
+
+<!--<hollow-dots-spinner-->
+<!--    :animation-duration="1000"-->
+<!--    :dot-size="15"-->
+<!--    :dots-num="3"-->
+<!--    color="#ff1d5e"-->
+<!--/>-->

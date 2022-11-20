@@ -42,11 +42,12 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", hm.auth1(handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist/", ""))).Methods(http.MethodGet)
+	router.HandleFunc("/", hm.auth(handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist/", ""))).Methods(http.MethodGet)
 
 	router.HandleFunc("/assets/{file}", handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", "")).Methods(http.MethodGet)
 
-	router.HandleFunc("/{folder}/", hm.auth1(handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", ""))).Methods(http.MethodGet)
+	router.HandleFunc("/login/", handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", "")).Methods(http.MethodGet)
+	router.HandleFunc("/{folder}/", hm.auth(handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", ""))).Methods(http.MethodGet)
 
 	router.HandleFunc("/{file}.{file}", handleFileServer(hm.Config.ROOT_PATH+"/web/vueui/remontti-ui/dist", "")).Methods(http.MethodGet)
 
@@ -66,7 +67,8 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 	// /api/v1/companies/
 	// и внутри разбирать запросы или даже на уровне версии апи
 	router.HandleFunc("/api/v1/translations/get", hm.getTranslationsApi).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/navigation/get", hm.auth1(hm.getNavigationApi)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/navigation/get", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/companies/get", hm.auth(hm.getCompaniesApi)).Methods(http.MethodGet)
 
 	return router, nil
 }

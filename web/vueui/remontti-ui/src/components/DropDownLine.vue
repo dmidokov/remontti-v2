@@ -1,14 +1,19 @@
 <template>
   <div @click.stop class="dropdown-line">
     <a v-if="link !== undefined" :href=link>{{ title }}</a>
-    <span v-else>{{ title }}</span>
+    <span v-else @click="handler" :data-id="dataid">{{ title }}</span>
   </div>
 </template>
 
 <script>
 export default {
   name: "DropDownLine",
-  props: ['title', 'link']
+  props: ['title', 'link', 'action', 'dataid'],
+  methods: {
+    handler(event) {
+      this.action(event)
+    }
+  }
 }
 </script>
 

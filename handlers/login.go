@@ -39,7 +39,7 @@ func (hm *HandlersModel) login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			http.Error(w, "Internal Server Error", 500)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	}
 }
@@ -184,8 +184,9 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 				log.Error("Не удалось кодировать JSON: %s", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
-
-			return
+			println("login.......................")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			//return
 		}
 
 	} else {
@@ -212,7 +213,7 @@ func (hm *HandlersModel) logout(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
 		log.Error("Неверный метод")
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
 	session, _ := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
@@ -222,8 +223,8 @@ func (hm *HandlersModel) logout(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Error("Не удалось сохранить данные сессии %s", err)
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Set("cache-control", "none")
+	http.Redirect(w, r, "https://control.remontti.site/", http.StatusSeeOther)
 }

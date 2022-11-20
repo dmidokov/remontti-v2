@@ -41,24 +41,34 @@ func GetNavigationDataToInsert(cfg *config.Configuration) navigationList {
 }
 
 func (pg *DatabaseModel) GetPermissionsDataToInsert(cfg *config.Configuration) (permissionsList, error) {
-	var userService userservice.UserModel = userservice.UserModel{DB: pg.DB}
-	var navigationservice navigationservice.NavigationModel = navigationservice.NavigationModel{DB: pg.DB}
+	var userService = userservice.UserModel{DB: pg.DB}
+	var navigationService = navigationservice.NavigationModel{DB: pg.DB}
+	var companiesService = companyservice.CompanyModel{DB: pg.DB}
 
 	user, err := userService.GetByNameAndCompanyId("admin", 0)
 	if err != nil {
 		return nil, err
 	}
 
-	var permissionList permissionsList = permissionsList{}
+	var permissionList = permissionsList{}
 	var actions = permissionservice.Actions
 
-	items, err := navigationservice.GetAll()
+	navigationItems, err := navigationService.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, item := range items {
+	for _, item := range navigationItems {
 		permissionList = append(permissionList, &permissionservice.Permissons{ComponentId: item.Id, ComponentType: "navigation", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
+	}
+
+	companiesItems, err := companiesService.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range companiesItems {
+		permissionList = append(permissionList, &permissionservice.Permissons{ComponentId: item.CompanyId, ComponentType: "company", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
 	}
 
 	return permissionList, nil
@@ -68,7 +78,7 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 
 	result := []*translationservice.Translation{}
 
-	var loginpage = translationsList{
+	var loginPage = translationsList{
 		&translationservice.Translation{Name: "loginpage", Label: "LoginFieldHeader", Ru: "Логин:", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "loginpage", Label: "PasswordFieldHeader", Ru: "Пароль:", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "loginpage", Label: "SignIn", Ru: "Войти", En: "", EditTime: 0},
@@ -83,14 +93,14 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 		&translationservice.Translation{Name: "loginpage", Label: "PasswordIsEmpty", Ru: "Не указан пароль", En: "", EditTime: 0},
 	}
 
-	var mainpage = translationsList{
+	var mainPage = translationsList{
 		&translationservice.Translation{Name: "mainpage", Label: "Title", Ru: "Главная", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "mainpage", Label: "Account", Ru: "Личный кабинет", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "mainpage", Label: "Settings", Ru: "Настройки", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "mainpage", Label: "Logout", Ru: "Выход", En: "", EditTime: 0},
 	}
 
-	var navigation = translationsList{
+	var navigationPage = translationsList{
 		&translationservice.Translation{Name: "navigation", Label: "LoginFieldHeader", Ru: "Меню...", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "AccountSettings", Ru: "Управление аккаунтом", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "Logout", Ru: "Выход", En: "", EditTime: 0},
@@ -100,15 +110,19 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 		&translationservice.Translation{Name: "navigation", Label: "Account", Ru: "Личный кабинет", En: "", EditTime: 0},
 	}
 
-	var companies = translationsList{
+	var companiesPage = translationsList{
 		&translationservice.Translation{Name: "companies", Label: "EditCompany", Ru: "Редактировать", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "DeleteCompany", Ru: "Удалить", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "CompanyTableTitle", Ru: "Компании", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "AddCompany", Ru: "Добавить", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "CompanyName", Ru: "Название", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "CompanyHost", Ru: "Хост", En: ""},
 	}
 
-	result = append(result, loginpage...)
-	result = append(result, mainpage...)
-	result = append(result, navigation...)
-	result = append(result, companies...)
+	result = append(result, loginPage...)
+	result = append(result, mainPage...)
+	result = append(result, navigationPage...)
+	result = append(result, companiesPage...)
 
 	return result
 }

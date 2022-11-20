@@ -37,7 +37,7 @@ export default {
         if (response.data.status === "error") {
           this.errorMessage = response.data.message
         } else {
-          window.location.href = window.location.href
+          window.location.href = "/"
         }
       }
     },
@@ -64,7 +64,7 @@ export default {
         <button @click="auth(login, password)">
           {{ getTranslations(this.translations, "SignIn") }}
         </button>
-        <div class="error-message">
+        <div class="error-message-login">
           {{ errorMessage }}
         </div>
       </div>
@@ -84,44 +84,7 @@ div {
   display: flex;
 }
 
-.modal {
-  width: 570px;
-  height: 380px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: 0px 0px 16px 2px rgba(34, 60, 80, 0.24);
-  border-radius: 10px;
-}
-
-.modal div {
-  margin: 10px 10px;
-}
-
-.modal input {
-  font-size: 18px;
-  border-radius: 10px;
-  outline: none;
-  padding: 10px 15px;
-  width: 200px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  color: rgba(0, 0, 0, 0.7);
-  background-color: var(--input-background);
-}
-
-button {
-  background: var(--button-color-1);
-  color: var(--button-text-color-1);
-  border-radius: 10px;
-  border: 0px solid transparent;
-  outline: none;
-}
-
-button:hover {
-  background: var(--button-color-1-light);
-}
-
-.error-message {
+.error-message-login {
   position: absolute;
   top: 100%;
 }
