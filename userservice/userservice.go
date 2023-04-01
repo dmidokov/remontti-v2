@@ -98,7 +98,7 @@ func (u *UserModel) Create(userName string, password string, companyId int) (*Us
 
 func (u *UserModel) GetAll() ([]*User, error) {
 
-	sql := `SELECT * FROM remonttiv2.users;`
+	sql := `SELECT * FROM remonttiv2.users WHERE 1=1;`
 
 	rows, err := u.DB.Query(context.Background(), sql)
 	if err != nil {

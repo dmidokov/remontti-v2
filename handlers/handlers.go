@@ -4,7 +4,7 @@ import (
 	"github.com/dmidokov/remontti-v2/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	_ "image/jpeg"
@@ -69,7 +69,6 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 	router.HandleFunc("/api/v1/translations/get", hm.getTranslationsApi).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/navigation/get", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/companies/get", hm.auth(hm.getCompaniesApi)).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/companies/add", hm.auth(hm.addCompaniesApi)).Methods(http.MethodPost)
 
 	return router, nil
 }

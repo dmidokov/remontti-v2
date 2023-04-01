@@ -58,13 +58,13 @@ func (pg *DatabaseModel) Prepare(cfg *config.Configuration) error {
 		}
 	}
 
-	log.Info("Создание таблиц")
+	log.Print("Создание таблиц")
 	err := pg.createTables(cfg)
 	if err != nil {
 		return err
 	}
 
-	log.Info("Создание компаний")
+	log.Print("Создание компаний")
 	err = pg.insertCompaniesData(cfg)
 	if err != nil {
 		return err
@@ -94,27 +94,18 @@ func (pg *DatabaseModel) Prepare(cfg *config.Configuration) error {
 		return err
 	}
 
-	log.Print("Создание групп")
-	err = pg.insertGroupData()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (pg *DatabaseModel) createTables(cfg *config.Configuration) error {
 
-	var batch = &pgx.Batch{}
+	var batch *pgx.Batch = &pgx.Batch{}
 
 	batch.Queue(CreateUsersTableSQL)
 	batch.Queue(CreateNavigationTableSQL)
 	batch.Queue(CreatePermissionsTableSQL)
 	batch.Queue(CreateTranslationsTableSQL)
 	batch.Queue(CreateCompaniesTableSQL)
-	batch.Queue(CreateGroupsPermissionsTableSQL)
-	batch.Queue(CreateGroupsTableSQL)
-	batch.Queue(CreateUsersGroupsTableSQL)
 
 	result := pg.DB.SendBatch(context.Background(), batch)
 	defer result.Close()
@@ -133,60 +124,16 @@ func (pg *DatabaseModel) createTables(cfg *config.Configuration) error {
 	}
 }
 
-func (pg *DatabaseModel) insertGroupData() error {
-	var permissionService = permissionservice.PermissionModel{DB: pg.DB}
-
-	var batch = &pgx.Batch{}
-
-	var groupData = GetGroupsDataToInsert()
-
-	allGroups, err := permissionService.GetAllGroups()
-
-	sqlInsert := `INSERT INTO remonttiv2.groups
-				(group_name)
-				VALUES 
-				($1)`
-	for _, groupData := range groupData {
-
-		groupExist := false
-		for _, groupsInTable := range allGroups {
-			if groupsInTable.GroupName == groupData.GroupName {
-				groupExist = true
-				break
-			}
-		}
-
-		if !groupExist {
-			batch.Queue(sqlInsert, groupData.GroupName)
-		}
-
-	}
-
-	result := pg.DB.SendBatch(context.Background(), batch)
-	defer result.Close()
-
-	for err == nil {
-		_, err = result.Exec()
-	}
-
-	if err.Error() == "no result" {
-		return nil
-	} else {
-		return err
-	}
-
-}
-
 // Создает таблицу пользователей если нет
 func (pg *DatabaseModel) insertUsersData(cfg *config.Configuration) error {
 
-	var userService = userservice.UserModel{DB: pg.DB}
+	var userservice userservice.UserModel = userservice.UserModel{DB: pg.DB}
 
-	var batch = &pgx.Batch{}
+	var batch *pgx.Batch = &pgx.Batch{}
 
 	usersData := GetUserDataToInsert(cfg)
 
-	allUsers, err := userService.GetAll()
+	allUsers, err := userservice.GetAll()
 	if err != nil {
 		return err
 	}
@@ -235,13 +182,13 @@ func (pg *DatabaseModel) insertUsersData(cfg *config.Configuration) error {
 }
 
 func (pg *DatabaseModel) insertNavigationData(cfg *config.Configuration) error {
-	var navigationService = navigationservice.NavigationModel{DB: pg.DB}
+	var navigationservice navigationservice.NavigationModel = navigationservice.NavigationModel{DB: pg.DB}
 
-	var batch = &pgx.Batch{}
+	var batch *pgx.Batch = &pgx.Batch{}
 
 	navigationData := GetNavigationDataToInsert(cfg)
 
-	allItems, err := navigationService.GetAll()
+	allItems, err := navigationservice.GetAll()
 	if err != nil {
 		return err
 	}
@@ -251,7 +198,7 @@ func (pg *DatabaseModel) insertNavigationData(cfg *config.Configuration) error {
 
 	for _, itemData := range navigationData {
 
-		var itemExist = false
+		var itemExist bool = false
 		for _, itemInTable := range allItems {
 			if itemInTable.Item_type == itemData.Item_type && itemInTable.Label == itemData.Label {
 				itemExist = true
@@ -284,16 +231,16 @@ func (pg *DatabaseModel) insertNavigationData(cfg *config.Configuration) error {
 
 func (pg *DatabaseModel) insertPermissionsData(cfg *config.Configuration) error {
 
-	var permissionService = permissionservice.PermissionModel{DB: pg.DB}
+	var permissionservice permissionservice.PermissionModel = permissionservice.PermissionModel{DB: pg.DB}
 
-	var batch = &pgx.Batch{}
+	var batch *pgx.Batch = &pgx.Batch{}
 
 	permissionsData, err := pg.GetPermissionsDataToInsert(cfg)
 	if err != nil {
 		return err
 	}
 
-	permissions, err := permissionService.GetAllPermissions()
+	permissions, err := permissionservice.GetAll()
 	if err != nil {
 		return err
 	}
@@ -303,7 +250,7 @@ func (pg *DatabaseModel) insertPermissionsData(cfg *config.Configuration) error 
 
 	for _, itemData := range permissionsData {
 
-		var itemExist = false
+		var itemExist bool = false
 		for _, permission := range permissions {
 			if permission.UserId == itemData.UserId && permission.ComponentId == itemData.ComponentId {
 				itemExist = true

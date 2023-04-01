@@ -5,5 +5,3 @@ secrets
 .idea
 /web/vueui/node_modules/.yarn-integrity
 log*
-/src/*
-vendor

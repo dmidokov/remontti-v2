@@ -71,7 +71,7 @@ func rowsProcessing(rows pgx.Rows) ([]*NavigationItem, error) {
 
 func (n *NavigationModel) GetAll() ([]*NavigationItem, error) {
 
-	sql := "SELECT * FROM remonttiv2.navigation"
+	sql := "SELECT * FROM remonttiv2.navigation WHERE 1=1"
 
 	rows, err := n.DB.Query(context.Background(), sql)
 	if err != nil {

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/dmidokov/remontti-v2/permissionservice"
 	"github.com/dmidokov/remontti-v2/userservice"
 	"log"
 	"net/http"
@@ -28,13 +27,6 @@ type companiesPageData struct {
 type newCompanyForm struct {
 	Name string `json:"name"`
 	Host string `json:"host"`
-}
-
-type addCompanyForm struct {
-	Name          string `json:"company_name"`
-	Host          string `json:"company_host"`
-	AdminName     string `json:"admin_name"`
-	AdminPassword string `json:"admin_password"`
 }
 
 type CompaniesResult struct {
@@ -145,88 +137,6 @@ func (hm *HandlersModel) addCompany(w http.ResponseWriter, r *http.Request) {
 		Errors: []string{},
 	})
 
-}
-
-func (hm *HandlersModel) addCompaniesApi(w http.ResponseWriter, r *http.Request) {
-
-	log := hm.Logger
-	log.Info("Add companies")
-
-	var form *addCompanyForm
-	err := json.NewDecoder(r.Body).Decode(&form)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		err := json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: pageData.Translation["ErrorTryAgain"],
-			Errors:  []string{"Internal server error"}})
-
-		log.Error("Не удалось декодировать запрос")
-
-		if err != nil {
-			log.Error("Не удалось кодировать JSON: %s", err)
-		}
-	}
-
-	var companyService = companyservice.CompanyModel{DB: hm.DB}
-	company, err := companyService.Add(form.Name, form.Host)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err := json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: "CompanyAlreadyExist",
-			Errors:  []string{"Internal server error"}})
-
-		log.Error("Не удалось добавить новую компанию")
-
-		if err != nil {
-			log.Error("Не удалось кодировать JSON: %s", err)
-		}
-
-		return
-	}
-
-	//TODO: добавить пользователя, права, возможно группы. Группы точно нужны, иначе назначать права неудобно
-	var userService = userservice.UserModel{DB: hm.DB}
-	user, err := userService.Create(form.AdminName, form.AdminPassword, company.CompanyId)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		err := json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: pageData.Translation["ErrorTryAgain"],
-			Errors:  []string{"Internal server error"}})
-
-		log.Error("Не удалось создать нового пользователя")
-
-		if err != nil {
-			log.Error("Не удалось кодировать JSON: %s", err)
-		}
-	}
-
-	permissionService := permissionservice.PermissionModel{DB: hm.DB}
-	err = permissionService.AddGroupForUser(user.Id, "Company admin")
-
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		err := json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: pageData.Translation["ErrorTryAgain"],
-			Errors:  []string{"Internal server error"}})
-
-		log.Errorf("Не удалось добавить новую группу %s для пользователя: %s", "Company admin", user.UserName)
-
-		if err != nil {
-			log.Error("Не удалось кодировать JSON: %s", err)
-		}
-
-		return
-
-	} else {
-		json.NewEncoder(w).Encode(response{
-			Status: "ok",
-			Errors: []string{},
-		})
-	}
 }
 
 func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request) {

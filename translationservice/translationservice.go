@@ -82,7 +82,7 @@ func (t *TranslationsModel) Get(pageNames ...string) ([]*Translation, error) {
 
 func (t *TranslationsModel) GetAll() ([]*Translation, error) {
 
-	sql := `SELECT * FROM remonttiv2.translations`
+	sql := `SELECT * FROM remonttiv2.translations WHERE 1=1`
 
 	rows, err := t.DB.Query(context.Background(), sql)
 	if err != nil {

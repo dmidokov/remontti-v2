@@ -3,7 +3,7 @@
     <input
         v-bind:value="value"
         v-on:input="$emit('changed', $event.target.value)"
-        :type="type"
+        type="text"
         :placeholder="placeholder">
   </div>
 </template>
@@ -11,12 +11,7 @@
 <script>
 export default {
   name: "InputModal",
-  props: ['placeholder', 'value', 'type'],
-  data() {
-    return {
-      type: this.type? this.type : "text"
-    }
-  }
+  props: ['placeholder', 'value']
 }
 </script>
 

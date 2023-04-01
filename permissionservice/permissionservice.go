@@ -3,10 +3,11 @@ package permissionservice
 import (
 	"context"
 	"errors"
-	"github.com/jackc/pgx"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
+
+	"github.com/jackc/pgx/v4"
 )
 
 type ActionsStruct struct {
@@ -25,7 +26,7 @@ type PermissionModel struct {
 	DB *pgxpool.Pool
 }
 
-type Permissions struct {
+type Permissons struct {
 	PermissionId  int
 	ComponentId   int
 	ComponentType string
@@ -34,28 +35,14 @@ type Permissions struct {
 	EditTime      int
 }
 
-type GroupsPermissions struct {
-	PermissionId  int
-	ComponentId   int
-	ComponentType string
-	GroupId       int
-	Actions       int
-	EditTime      int
-}
-
-type Group struct {
-	GroupId   int
-	GroupName string
-}
-
 // ErrPermissionAlreadyExists Ошибка - разрешение уже существует
 var ErrPermissionAlreadyExists = errors.New("permissions: Permission already exists")
 
 // Обработка строки ответа от БД
-// возвращает структуру Permissions
-func permissionsRowProcessing(row pgx.Row) (*Permissions, error) {
+// Возвращает структуру Permissions
+func rowProcessing(row pgx.Row) (*Permissons, error) {
 
-	var permission = &Permissions{}
+	var permission = &Permissons{}
 
 	err := row.Scan(&permission.PermissionId, &permission.ComponentId, &permission.UserId, &permission.Actions, &permission.EditTime)
 
@@ -66,11 +53,11 @@ func permissionsRowProcessing(row pgx.Row) (*Permissions, error) {
 
 }
 
-func permissionsRowsProcessing(rows pgx.Rows) ([]*Permissions, error) {
-	var result []*Permissions
+func rowsProcessing(rows pgx.Rows) ([]*Permissons, error) {
+	var result []*Permissons
 
 	for rows.Next() {
-		var permission = &Permissions{}
+		var permission = &Permissons{}
 		err := rows.Scan(&permission.PermissionId, &permission.ComponentId, &permission.ComponentType, &permission.UserId, &permission.Actions, &permission.EditTime)
 		if err != nil {
 			log.Print(err)
@@ -84,54 +71,24 @@ func permissionsRowsProcessing(rows pgx.Rows) ([]*Permissions, error) {
 	return result, nil
 }
 
-func groupRowsProcessing(rows pgx.Rows) ([]*Group, error) {
-	var result []*Group
-
-	for rows.Next() {
-		var group = &Group{}
-		err := rows.Scan(&group.GroupId, &group.GroupName)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		result = append(result, group)
-	}
-
-	return result, nil
-}
-
-func groupRowProcessing(row pgx.Row) (*Group, error) {
-
-	var group = &Group{}
-
-	err := row.Scan(&group.GroupId, &group.GroupName)
-
-	if err != nil {
-		println(err.Error())
-		return nil, err
-	}
-	return group, nil
-
-}
-
-// GetPermissionsByComponentIdAndUserId Возвращает Разрешения компонента для пользователя
-func (p *PermissionModel) GetPermissionsByComponentIdAndUserId(componentId, userId int) (*Permissions, error) {
+// GetByComponentIdAndUserId Возвращает Разрешения компонента для пользователя
+func (p *PermissionModel) GetByComponentIdAndUserId(component_id, user_id int) (*Permissons, error) {
 	sql := "SELECT * FROM remonttiv2.permissions WHERE component_id=$1 AND user_id=$2"
-	row := p.DB.QueryRow(context.Background(), sql, componentId, userId)
+	row := p.DB.QueryRow(context.Background(), sql, component_id, user_id)
 
-	return permissionsRowProcessing(row)
+	return rowProcessing(row)
 }
 
-// GetPermissionsById Возвращает Разрешения по их идентификатору
-func (p *PermissionModel) GetPermissionsById(id int) (*Permissions, error) {
+// GetById Возвращает Разрешения по их идентификатору
+func (p *PermissionModel) GetById(id int) (*Permissons, error) {
 	sql := "SELECT * FROM remonttiv2.permissions WHERE permission_id=$1"
 	row := p.DB.QueryRow(context.Background(), sql, id)
 
-	return permissionsRowProcessing(row)
+	return rowProcessing(row)
 }
 
-func (p *PermissionModel) GetAllPermissions() ([]*Permissions, error) {
-	sql := "SELECT * FROM remonttiv2.permissions"
+func (p *PermissionModel) GetAll() ([]*Permissons, error) {
+	sql := "SELECT * FROM remonttiv2.permissions WHERE 1=1"
 	rows, err := p.DB.Query(context.Background(), sql)
 	if err != nil {
 		return nil, err
@@ -139,25 +96,13 @@ func (p *PermissionModel) GetAllPermissions() ([]*Permissions, error) {
 
 	defer rows.Close()
 
-	return permissionsRowsProcessing(rows)
-}
-
-func (p *PermissionModel) GetAllGroups() ([]*Group, error) {
-	sql := "SELECT * FROM remonttiv2.groups"
-	rows, err := p.DB.Query(context.Background(), sql)
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	return groupRowsProcessing(rows)
+	return rowsProcessing(rows)
 }
 
 // Set Создает новые Разрешения на компонент для пользователя
-func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissions, error) {
+func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissons, error) {
 
-	permission, err := p.GetPermissionsByComponentIdAndUserId(componentId, userId)
+	permission, err := p.GetByComponentIdAndUserId(componentId, userId)
 
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
@@ -180,40 +125,8 @@ func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissions, e
 		if err != nil {
 			return nil, err
 		}
-		return p.GetPermissionsByComponentIdAndUserId(componentId, userId)
+		return p.GetByComponentIdAndUserId(componentId, userId)
 
 	}
 
-}
-
-func (p *PermissionModel) GetGroupByName(groupName string) (*Group, error) {
-
-	sql := `SELECT * FROM remonttiv2.groups WHERE group_name = $1`
-
-	println(sql)
-
-	row := p.DB.QueryRow(context.Background(), sql, groupName)
-
-	return groupRowProcessing(row)
-
-}
-
-func (p *PermissionModel) AddGroupForUser(userId int, groupName string) error {
-	group, err := p.GetGroupByName(groupName)
-	if err != nil {
-		return err
-	}
-
-	sql := `INSERT INTO remonttiv2.users_groups (user_id, group_id) VALUES ($1, $2)`
-	_, err = p.DB.Exec(context.Background(), sql, userId, group.GroupId)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *PermissionModel) AddGroupForUser(id int, s string) error {
-	return nil
 }

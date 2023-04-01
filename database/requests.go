@@ -2,40 +2,6 @@ package database
 
 // Таблицы
 
-var CreateGroupsPermissionsTableSQL = `
-	CREATE TABLE IF NOT EXISTS remonttiv2.group_permissions(
-		permission_id SERIAL NOT NULL,
-		component_id integer NOT NULL,
-		component_type character varying(50) NOT NULL,
-		group_id integer NOT NULL,
-		actions integer NOT NULL,
-		edit_time integer NOT NULL,
-		PRIMARY KEY (permission_id)
-	)
-	    
-	TABLESPACE pg_default;
-`
-
-var CreateUsersGroupsTableSQL = `
-	CREATE TABLE IF NOT EXISTS remonttiv2.users_groups(
-	    user_id integer NOT NULL,
-	    group_id integer NOT NULL,
-	    UNIQUE (user_id, group_id)                   
-	)
-	    
-	TABLESPACE pg_default;
-`
-
-var CreateGroupsTableSQL = `
-	CREATE TABLE IF NOT EXISTS remonttiv2.groups(
-    	group_id SERIAL NOT NULL,
-    	group_name character varying(50) NOT NULL,
-		PRIMARY KEY (group_id),
-		UNIQUE (group_name)	
-	)
-
-	TABLESPACE pg_default;`
-
 var CreateUsersTableSQL = `
 	CREATE TABLE IF NOT EXISTS remonttiv2.users(
     	id SERIAL NOT NULL,
@@ -54,8 +20,7 @@ var SetUserTableOwnerSql = `ALTER TABLE IF EXISTS remonttiv2.users OWNER to %s`
 
 var SetUsersTableCommentSQL = `
 	COMMENT ON TABLE remonttiv2.users
-		IS 'Contains information about users';
-`
+		IS 'Contains information about users';`
 
 var CreateNavigationTableSQL = `
 	CREATE TABLE IF NOT EXISTS remonttiv2.navigation(
@@ -105,8 +70,7 @@ var CreateCompaniesTableSQL = `
 		company_name character varying(50) NOT NULL,
 		host_name character varying(100) NOT NULL,
 		edit_time integer NOT NULL,
-		PRIMARY KEY (company_id, company_name),
-		UNIQUE (company_name, host_name)
+		PRIMARY KEY (company_id, company_name)
 	)
 	TABLESPACE pg_default;
 `

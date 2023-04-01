@@ -12,17 +12,6 @@
         @changed="updateCompanyHostValue"
         :placeholder="getTranslations('CompanyHost')"/>
 
-    <InputModal
-        v-bind:value="companyAdminName"
-        @changed="updateCompanyAdminNameValue"
-        :placeholder="getTranslations('CompanyAdminName')" />
-
-    <InputModal
-        v-bind:value="companyAdminPassword"
-        v-bind:type="'password'"
-        @changed="updateCompanyPasswordValue"
-        :placeholder="getTranslations('CompanyAdminPassword')" />
-
     <ActionButton18 :title="getTranslations('AddCompany')" class="modal-horizontal-center-button" :action="addCompany"/>
   </div>
 </template>
@@ -40,9 +29,7 @@ export default {
   data() {
     return {
       companyName: "",
-      companyHost: "",
-      companyAdminName:"",
-      companyAdminPassword:""
+      companyHost: ""
     }
   },
   name: "AddCompanyModal",
@@ -55,10 +42,8 @@ export default {
     async addCompany(event) {
 
       const companyData = {
-        'company_name': this.companyName,
-        'company_host': this.companyHost,
-        'admin_name': this.companyAdminName,
-        'admin_password':this.companyAdminPassword
+        'companyName': this.companyName,
+        'companyHost': this.companyHost
       }
 
       let response = await post("/api/v1/companies/add", companyData)
@@ -73,7 +58,7 @@ export default {
           console.log("ok")
         }
       } else {
-        console.log(response)
+
         document
             .getElementById('error-popup-block')
             .append(createErrorBlock("Ошибка", "В ходе выполнения запроса произошла ошибка, попробуйте еще раз"))
@@ -85,12 +70,6 @@ export default {
     },
     updateCompanyHostValue(value) {
       this.companyHost = value;
-    },
-    updateCompanyAdminNameValue(value) {
-      this.companyAdminName = value;
-    },
-    updateCompanyPasswordValue(value) {
-      this.companyAdminPassword = value;
     }
   }
 }
