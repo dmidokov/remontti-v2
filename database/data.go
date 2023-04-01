@@ -11,9 +11,16 @@ import (
 
 type usersList []*userservice.User
 type navigationList []*navigationservice.NavigationItem
-type permissionsList []*permissionservice.Permissons
+type permissionsList []*permissionservice.Permissions
 type translationsList []*translationservice.Translation
 type companiesList []*companyservice.Company
+type groupsList []*permissionservice.Group
+
+func GetGroupsDataToInsert() groupsList {
+	return groupsList{
+		&permissionservice.Group{GroupId: 0, GroupName: "Company admin"},
+	}
+}
 
 func GetCompaniesDataToInsert() companiesList {
 	return companiesList{
@@ -59,7 +66,7 @@ func (pg *DatabaseModel) GetPermissionsDataToInsert(cfg *config.Configuration) (
 	}
 
 	for _, item := range navigationItems {
-		permissionList = append(permissionList, &permissionservice.Permissons{ComponentId: item.Id, ComponentType: "navigation", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
+		permissionList = append(permissionList, &permissionservice.Permissions{ComponentId: item.Id, ComponentType: "navigation", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
 	}
 
 	companiesItems, err := companiesService.GetAll()
@@ -68,7 +75,7 @@ func (pg *DatabaseModel) GetPermissionsDataToInsert(cfg *config.Configuration) (
 	}
 
 	for _, item := range companiesItems {
-		permissionList = append(permissionList, &permissionservice.Permissons{ComponentId: item.CompanyId, ComponentType: "company", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
+		permissionList = append(permissionList, &permissionservice.Permissions{ComponentId: item.CompanyId, ComponentType: "company", UserId: user.Id, Actions: actions.VIEW | actions.EDIT | actions.DELETE})
 	}
 
 	return permissionList, nil
@@ -108,15 +115,19 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) translationsList {
 		&translationservice.Translation{Name: "navigation", Label: "Home", Ru: "Главная", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "Companies", Ru: "Организации", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "Account", Ru: "Личный кабинет", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "CompanyAlreadyExists", Ru: "Компания уже существует", En: "", EditTime: 0},
 	}
 
 	var companiesPage = translationsList{
 		&translationservice.Translation{Name: "companies", Label: "EditCompany", Ru: "Редактировать", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "DeleteCompany", Ru: "Удалить", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyTableTitle", Ru: "Компании", En: ""},
-		&translationservice.Translation{Name: "companies", Label: "AddCompany", Ru: "Добавить", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "Add" +
+			"Company", Ru: "Добавить", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyName", Ru: "Название", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyHost", Ru: "Хост", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "CompanyAdminName", Ru: "Логин администратора", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "CompanyAdminPassword", Ru: "Пароль администратора", En: ""},
 	}
 
 	result = append(result, loginPage...)
