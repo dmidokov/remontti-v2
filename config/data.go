@@ -14,7 +14,7 @@ const (
 	MODE                       = "MODE"
 )
 
-// Структура для хранения конфигруации
+// Configuration Структура для хранения конфигруации
 type Configuration struct {
 	DB_USER                    string
 	DB_PASSWORD                string

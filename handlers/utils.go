@@ -16,7 +16,7 @@ type SessionData struct {
 
 func (hm *HandlersModel) getUserNavigation(userId int, translation map[string]string) (map[string]navigationData, error) {
 
-	var navigation navigationservice.NavigationModel = navigationservice.NavigationModel{DB: hm.DB}
+	var navigation = navigationservice.NavigationModel{DB: hm.DB}
 
 	items, err := navigation.GetAllForUser(userId)
 	if err != nil {
@@ -55,7 +55,7 @@ func (hm *HandlersModel) getSessionData(r *http.Request) (*SessionData, error) {
 
 func (hm *HandlersModel) getTranslations(pagenames ...string) (map[string]string, error) {
 
-	var translation translationservice.TranslationsModel = translationservice.TranslationsModel{DB: hm.DB}
+	var translation = translationservice.TranslationsModel{DB: hm.DB}
 
 	translations, err := translation.Get(pagenames...)
 
@@ -74,7 +74,7 @@ func (hm *HandlersModel) getTranslations(pagenames ...string) (map[string]string
 
 func (hm *HandlersModel) getCompanies() (*[]companiesData, error) {
 
-	var companyservice companyservice.CompanyModel = companyservice.CompanyModel{DB: hm.DB}
+	var companyservice = companyservice.CompanyModel{DB: hm.DB}
 
 	companies, err := companyservice.GetAll()
 	if err != nil {

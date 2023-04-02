@@ -40,7 +40,7 @@ func rowsProcessing(rows pgx.Rows) ([]*Company, error) {
 }
 
 func (c *CompanyModel) GetAll() ([]*Company, error) {
-	sql := `SELECT * FROM remonttiv2.companies WHERE 1=1;`
+	sql := `SELECT * FROM remonttiv2.companies;`
 
 	rows, err := c.DB.Query(context.Background(), sql)
 	if err != nil {

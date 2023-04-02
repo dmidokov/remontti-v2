@@ -36,7 +36,7 @@ func New(db *pgxpool.Pool, cfg *config.Configuration, cookieStore *sessions.Cook
 	}
 }
 
-// Возвращает *mux.Router, c handlerFunction
+// Router Возвращает *mux.Router, c handlerFunction
 // А также файловые сервер для выдачи статики css/js/jpg/...
 func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 
@@ -69,6 +69,7 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 	router.HandleFunc("/api/v1/translations/get", hm.getTranslationsApi).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/navigation/get", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/companies/get", hm.auth(hm.getCompaniesApi)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/companies/add", hm.auth(hm.addCompaniesApi)).Methods(http.MethodPost)
 
 	return router, nil
 }

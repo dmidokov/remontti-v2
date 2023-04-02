@@ -26,7 +26,7 @@ type UserModel struct {
 	CookieStore *sessions.CookieStore
 }
 
-// Ошибка ErrUserAlreadyExists возвращается при попытке создать
+// ErrUserAlreadyExists Ошибка ErrUserAlreadyExists возвращается при попытке создать
 // пользователя который уже существует в системе
 var ErrUserAlreadyExists = errors.New("users: User already exists")
 
@@ -98,7 +98,7 @@ func (u *UserModel) Create(userName string, password string, companyId int) (*Us
 
 func (u *UserModel) GetAll() ([]*User, error) {
 
-	sql := `SELECT * FROM remonttiv2.users WHERE 1=1;`
+	sql := `SELECT * FROM remonttiv2.users;`
 
 	rows, err := u.DB.Query(context.Background(), sql)
 	if err != nil {

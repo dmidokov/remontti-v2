@@ -65,7 +65,7 @@ func main() {
 	} else if config.MODE == "dev" {
 		router, err = handler.Router(true)
 	} else {
-		router, err = nil, errors.New("Неизвестный режим запуска")
+		router, err = nil, errors.New("неизвестный режим запуска")
 	}
 
 	if err != nil {
