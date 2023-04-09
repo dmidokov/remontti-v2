@@ -9,6 +9,7 @@ require (
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/lib/pq v1.10.7
+	github.com/liudng/godump v0.0.0-20150708094948-5c7e73aafb21
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/crypto v0.6.0
 )

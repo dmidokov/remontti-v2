@@ -1,12 +1,22 @@
 <template>
   <div class="header-part">
-    Left
+    {{ companyName }}
   </div>
 </template>
 
 <script>
+import * as requests from "../../scripts/requests.js";
+
 export default {
-  name: "LeftHeaderBlock"
+  name: "LeftHeaderBlock",
+  data() {
+    return {
+      companyName : ''
+    }
+  },
+  async beforeCreate() {
+    this.companyName = (await requests.get("/api/v1/companies/get?act=getCurrentCompanyName")).data
+  }
 }
 </script>
 

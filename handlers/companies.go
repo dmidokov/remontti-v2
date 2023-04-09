@@ -40,12 +40,6 @@ type deleteCompanyForm struct {
 	CompanyId int `json:"company_id"`
 }
 
-type CompaniesResult struct {
-	CompanyName string `json:"company"`
-	HostName    string `json:"host"`
-	CompanyId   int    `json:"id"`
-}
-
 func (hm *HandlersModel) companies(w http.ResponseWriter, r *http.Request) {
 
 	var rootPath = hm.Config.ROOT_PATH + "/web/ui/"
@@ -329,10 +323,10 @@ func (hm *HandlersModel) deleteCompaniesApi(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	result := CompaniesResult{
-		company.CompanyName,
-		company.HostName,
-		company.CompanyId,
+	result := companyservice.CompaniesResult{
+		CompanyName: company.CompanyName,
+		HostName:    company.HostName,
+		CompanyId:   company.CompanyId,
 	}
 
 	json.NewEncoder(w).Encode(result)
@@ -368,16 +362,15 @@ func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	companies, err := companiesService.GetAllForUser(userId)
-	print(len(companies))
-	result := make([]*CompaniesResult, 0)
-	for _, item := range companies {
-		result = append(
-			result,
-			&CompaniesResult{CompanyName: item.CompanyName, HostName: item.HostName, CompanyId: item.CompanyId},
-		)
-	}
+	act := r.URL.Query().Get("act")
 
-	json.NewEncoder(w).Encode(result)
+	switch act {
+	case "getCurrentCompanyName":
+		result := companiesService.GetUserCompanyName(userId)
+		json.NewEncoder(w).Encode(result)
+	default:
+		result, _ := companiesService.GetAllForUser(userId)
+		json.NewEncoder(w).Encode(result)
+	}
 
 }

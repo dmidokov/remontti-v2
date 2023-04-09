@@ -21,6 +21,16 @@ type Company struct {
 	EditTime    int
 }
 
+type CompaniesResult struct {
+	CompanyName string `json:"company"`
+	HostName    string `json:"host"`
+	CompanyId   int    `json:"id"`
+}
+
+type CompanyNameResponse struct {
+	CompanyName string `json:"company_name"`
+}
+
 const ComponentType = "company"
 
 func rowsProcessing(rows pgx.Rows) ([]*Company, error) {
@@ -42,9 +52,7 @@ func rowsProcessing(rows pgx.Rows) ([]*Company, error) {
 }
 
 func (c *CompanyModel) GetAll() ([]*Company, error) {
-	sql := `SELECT * FROM remonttiv2.companies;`
-
-	rows, err := c.DB.Query(context.Background(), sql)
+	rows, err := c.DB.Query(context.Background(), getAll)
 	if err != nil {
 		return nil, err
 	}
@@ -55,62 +63,41 @@ func (c *CompanyModel) GetAll() ([]*Company, error) {
 }
 
 func (c *CompanyModel) GetCompanyByName(companyName string) (*Company, error) {
-
-	sql := `SELECT * FROM remonttiv2.companies WHERE company_name=$1;`
-
-	row := c.DB.QueryRow(context.Background(), sql, companyName)
-
+	row := c.DB.QueryRow(context.Background(), getCompanyByName, companyName)
 	return rowProcessing(row)
-
 }
 
 func (c *CompanyModel) GetCompanyById(companyId int) (*Company, error) {
-
-	sql := `SELECT * FROM remonttiv2.companies WHERE company_id=$1;`
-
-	row := c.DB.QueryRow(context.Background(), sql, companyId)
-
+	row := c.DB.QueryRow(context.Background(), getCompanyById, companyId)
 	return rowProcessing(row)
-
 }
 
 func (c *CompanyModel) GetCompanyByHostName(hostName string) (*Company, error) {
-
-	sql := `SELECT * FROM remonttiv2.companies WHERE host_name=$1;`
-
-	row := c.DB.QueryRow(context.Background(), sql, hostName)
-
+	row := c.DB.QueryRow(context.Background(), getCompanyByHostName, hostName)
 	return rowProcessing(row)
-
 }
 
 func rowProcessing(row pgx.Row) (*Company, error) {
-
 	var company = &Company{}
 
 	err := row.Scan(&company.CompanyId, &company.CompanyName, &company.HostName, &company.EditTime)
-
 	if err != nil {
 		return nil, err
 	}
-	return company, nil
 
+	return company, nil
 }
 
 func (c *CompanyModel) Add(name, host string) (*Company, error) {
 
 	time := time.Now().Unix()
 
-	sql := "INSERT INTO remonttiv2.companies (company_name, host_name, edit_time) VALUES($1, $2, $3)"
-
-	_, err := c.DB.Exec(context.Background(), sql, name, host, time)
+	_, err := c.DB.Exec(context.Background(), insertCompany, name, host, time)
 	if err != nil {
 		return nil, err
 	}
 
-	sql = "SELECT * FROM remonttiv2.companies WHERE company_name=$1 AND host_name=$2 AND edit_time=$3"
-
-	row := c.DB.QueryRow(context.Background(), sql, name, host, time)
+	row := c.DB.QueryRow(context.Background(), selectCompanyByNameHostTime, name, host, time)
 
 	return rowProcessing(row)
 }
@@ -124,16 +111,12 @@ func (c *CompanyModel) Delete(companyId int) (*Company, error) {
 		return nil, err
 	}
 
-	sql := "DELETE FROM remonttiv2.companies WHERE company_id = $1"
-
-	_, err = c.DB.Exec(context.Background(), sql, companyId)
+	_, err = c.DB.Exec(context.Background(), deleteByCompanyId, companyId)
 	if err != nil {
 		return nil, err
 	}
 
-	sql = "DELETE FROM remonttiv2.permissions WHERE component_id = $1 AND component_type = $2"
-
-	_, err = c.DB.Exec(context.Background(), sql, companyId, ComponentType)
+	_, err = c.DB.Exec(context.Background(), deletePermissionByComponentIdAndType, companyId, ComponentType)
 	if err != nil {
 		return nil, err
 	}
@@ -141,26 +124,38 @@ func (c *CompanyModel) Delete(companyId int) (*Company, error) {
 	return company, nil
 }
 
-func (c *CompanyModel) GetAllForUser(userId int) ([]*Company, error) {
+func (c *CompanyModel) GetAllForUser(userId int) ([]*CompaniesResult, error) {
 
-	sql := `SELECT 
-    			remonttiv2.companies.company_id, remonttiv2.companies.company_name, 
-    			remonttiv2.companies.host_name, remonttiv2.companies.edit_time 
-			FROM 
-			    remonttiv2.companies, remonttiv2.permissions 
-			WHERE
-			    remonttiv2.companies.company_id = remonttiv2.permissions.component_id AND
-				remonttiv2.permissions.component_type = 'company' AND
-			    (remonttiv2.permissions.actions & $1) = $1 AND
-			    remonttiv2.permissions.user_id = $2;`
-
-	rows, err := c.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW, userId)
+	rows, err := c.DB.Query(context.Background(), getCompaniesForUser, permissionservice.Actions.VIEW, userId)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	return rowsProcessing(rows)
+	processedRows, _ := rowsProcessing(rows)
 
+	result := make([]*CompaniesResult, 0)
+	for _, item := range processedRows {
+		result = append(
+			result,
+			&CompaniesResult{CompanyName: item.CompanyName, HostName: item.HostName, CompanyId: item.CompanyId},
+		)
+	}
+
+	return result, nil
+}
+
+func (c *CompanyModel) GetUserCompanyName(userId int) string {
+
+	row := c.DB.QueryRow(context.Background(), getUserCompanyName, userId)
+
+	var result = &CompanyNameResponse{}
+	err := row.Scan(&result.CompanyName)
+	if err != nil {
+		println(err.Error())
+		return "-"
+	}
+
+	return result.CompanyName
 }
