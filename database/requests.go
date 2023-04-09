@@ -63,6 +63,7 @@ var CreateNavigationTableSQL = `
 		item_type integer NOT NULL,
 		link character varying(100) COLLATE pg_catalog."default" NOT NULL UNIQUE,
 		label character varying(50) COLLATE pg_catalog."default" NOT NULL,
+		ordinal_number integer NOT NULL,
 		edit_time integer
 	)
 

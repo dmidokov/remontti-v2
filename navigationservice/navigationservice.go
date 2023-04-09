@@ -13,11 +13,12 @@ import (
 )
 
 type NavigationItem struct {
-	Id        int
-	Item_type int
-	Link      string
-	Label     string
-	EditTime  int64
+	Id             int
+	Item_type      int
+	Link           string
+	Label          string
+	EditTime       int64
+	Ordinal_number int
 }
 
 type NavigationItemInsert struct {
@@ -32,19 +33,13 @@ type NavigationModel struct {
 
 var ErrItemAlreadyExists = errors.New("navigation: Item already exists")
 
-func New(db *pgxpool.Pool) *NavigationModel {
-	return &NavigationModel{
-		DB: db,
-	}
-}
-
 const componentType = "navigation"
 
 func rowProcessing(row pgx.Row) (*NavigationItem, error) {
 
 	var navigation = &NavigationItem{}
 
-	err := row.Scan(&navigation.Id, &navigation.Item_type, &navigation.Link, &navigation.Label, &navigation.EditTime)
+	err := row.Scan(&navigation.Id, &navigation.Item_type, &navigation.Link, &navigation.Label, &navigation.Ordinal_number, &navigation.EditTime)
 
 	if err != nil {
 		return nil, err
@@ -58,7 +53,7 @@ func rowsProcessing(rows pgx.Rows) ([]*NavigationItem, error) {
 
 	for rows.Next() {
 		var item = &NavigationItem{}
-		err := rows.Scan(&item.Id, &item.Item_type, &item.Link, &item.Label, &item.EditTime)
+		err := rows.Scan(&item.Id, &item.Item_type, &item.Link, &item.Label, &item.Ordinal_number, &item.EditTime)
 		if err != nil {
 			log.Print(err)
 			continue
@@ -90,14 +85,15 @@ func (n *NavigationModel) GetAllForUser(userId int) ([]*NavigationItem, error) {
 
 	sql := `SELECT 
 				remonttiv2.navigation.id, remonttiv2.navigation.item_type, remonttiv2.navigation.link, 
-				remonttiv2.navigation.label, remonttiv2.navigation.edit_time
+				remonttiv2.navigation.label, remonttiv2.navigation.ordinal_number, remonttiv2.navigation.edit_time
 			FROM 
 				remonttiv2.navigation, remonttiv2.permissions 
 			WHERE 
 				remonttiv2.navigation.id = remonttiv2.permissions.component_id AND
 				(remonttiv2.permissions.actions & $1) = $1 AND
 				remonttiv2.permissions.user_id = $2 AND 
-				remonttiv2.permissions.component_type = $3 ;`
+				remonttiv2.permissions.component_type = $3
+			ORDER BY remonttiv2.navigation.ordinal_number ASC`
 
 	rows, err := n.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW, userId, componentType)
 	if err != nil {
@@ -135,7 +131,7 @@ func (n *NavigationModel) GetById(id int) (*NavigationItem, error) {
 
 }
 
-// Get Получает строку из таблица navigation по типу пункта меню, сслыке и заголовку
+// Get Получает строку из таблицы navigation по типу пункта меню, ссылке и заголовку
 func (n *NavigationModel) Get(itemType int, link, label string) (*NavigationItem, error) {
 
 	sql := "SELECT * FROM remonttiv2.navigation WHERE item_type=$1 AND link=$2 AND label=$3"

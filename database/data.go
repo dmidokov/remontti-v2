@@ -39,10 +39,11 @@ func GetUserDataToInsert(cfg *config.Configuration) UsersList {
 func GetNavigationDataToInsert(cfg *config.Configuration) NavigationList {
 
 	return NavigationList{
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/", Label: "Home", EditTime: 0},
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/companies/", Label: "Companies", EditTime: 0},
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/settings/", Label: "Settings", EditTime: 0},
-		&navigationservice.NavigationItem{Item_type: 1, Link: "/logout", Label: "Logout", EditTime: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/", Label: "Home", EditTime: 0, Ordinal_number: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/companies/", Label: "Companies", EditTime: 0, Ordinal_number: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/settings/", Label: "Settings", EditTime: 0, Ordinal_number: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/logout", Label: "Logout", EditTime: 0, Ordinal_number: 0},
+		&navigationservice.NavigationItem{Item_type: 1, Link: "/permissions/", Label: "Permissions", EditTime: 0, Ordinal_number: 0},
 	}
 
 }
@@ -116,6 +117,7 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) TranslationsList {
 		&translationservice.Translation{Name: "navigation", Label: "Companies", Ru: "Организации", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "Account", Ru: "Личный кабинет", En: "", EditTime: 0},
 		&translationservice.Translation{Name: "navigation", Label: "CompanyAlreadyExists", Ru: "Компания уже существует", En: "", EditTime: 0},
+		&translationservice.Translation{Name: "navigation", Label: "Permissions", Ru: "Настройка прав", En: "", EditTime: 0},
 	}
 
 	var companiesPage = TranslationsList{

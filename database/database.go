@@ -243,7 +243,7 @@ func (pg *DatabaseModel) insertNavigationData(cfg *config.Configuration) error {
 		return err
 	}
 
-	sqlInsert := `INSERT INTO remonttiv2.navigation (item_type, link, label, edit_time) VALUES ($1, $2, $3, $4)`
+	sqlInsert := `INSERT INTO remonttiv2.navigation (item_type, link, label, edit_time, ordinal_number) VALUES ($1, $2, $3, $4, $5)`
 	sqlUpdate := `UPDATE remonttiv2.navigation SET item_type=$1, label=$2, edit_time=$3 WHERE link=$4`
 
 	for _, itemData := range navigationData {
@@ -259,7 +259,7 @@ func (pg *DatabaseModel) insertNavigationData(cfg *config.Configuration) error {
 		if itemExist {
 			batch.Queue(sqlUpdate, itemData.Item_type, itemData.Label, itemData.EditTime, itemData.Link)
 		} else {
-			batch.Queue(sqlInsert, itemData.Item_type, itemData.Link, itemData.Label, itemData.EditTime)
+			batch.Queue(sqlInsert, itemData.Item_type, itemData.Link, itemData.Label, itemData.EditTime, itemData.Ordinal_number)
 		}
 
 	}
