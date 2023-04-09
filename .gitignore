@@ -7,3 +7,4 @@ secrets
 log*
 /src/*
 vendor
+/web/node_modules/

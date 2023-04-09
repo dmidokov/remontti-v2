@@ -70,6 +70,7 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 	router.HandleFunc("/api/v1/navigation/get", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/companies/get", hm.auth(hm.getCompaniesApi)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/companies/add", hm.auth(hm.addCompaniesApi)).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/companies/delete", hm.auth(hm.deleteCompaniesApi)).Methods(http.MethodPost)
 
 	return router, nil
 }

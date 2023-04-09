@@ -3,6 +3,7 @@ package permissionservice
 import (
 	"context"
 	"errors"
+	"github.com/dmidokov/remontti-v2/userservice"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
@@ -57,7 +58,8 @@ func permissionsRowProcessing(row pgx.Row) (*Permissions, error) {
 
 	var permission = &Permissions{}
 
-	err := row.Scan(&permission.PermissionId, &permission.ComponentId, &permission.UserId, &permission.Actions, &permission.EditTime)
+	//TODO:: можно ли принять сразу в запись а не по одному?permission, err := p.GetPermissionsByComponentIdAndUserId(componentId, userId)
+	err := row.Scan(&permission.PermissionId, &permission.ComponentId, &permission.ComponentType, &permission.UserId, &permission.Actions, &permission.EditTime)
 
 	if err != nil {
 		return nil, err
@@ -115,9 +117,9 @@ func groupRowProcessing(row pgx.Row) (*Group, error) {
 }
 
 // GetPermissionsByComponentIdAndUserId Возвращает Разрешения компонента для пользователя
-func (p *PermissionModel) GetPermissionsByComponentIdAndUserId(componentId, userId int) (*Permissions, error) {
-	sql := "SELECT * FROM remonttiv2.permissions WHERE component_id=$1 AND user_id=$2"
-	row := p.DB.QueryRow(context.Background(), sql, componentId, userId)
+func (p *PermissionModel) GetPermissionsByComponentIdAndUserId(componentId, userId int, componentType string) (*Permissions, error) {
+	sql := "SELECT * FROM remonttiv2.permissions WHERE component_id=$1 AND user_id=$2 AND component_type=$3"
+	row := p.DB.QueryRow(context.Background(), sql, componentId, userId, componentType)
 
 	return permissionsRowProcessing(row)
 }
@@ -155,35 +157,41 @@ func (p *PermissionModel) GetAllGroups() ([]*Group, error) {
 }
 
 // Set Создает новые Разрешения на компонент для пользователя
-func (p *PermissionModel) Set(componentId, userId, actions int) (*Permissions, error) {
-
-	permission, err := p.GetPermissionsByComponentIdAndUserId(componentId, userId)
+func (p *PermissionModel) Set(componentId, userId, actions int, componentType string) (*Permissions, error) {
+	permission, err := p.GetPermissionsByComponentIdAndUserId(componentId, userId, componentType)
 
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 
-	if permission != nil {
+	if permission == nil {
+		sql := "INSERT INTO remonttiv2.permissions (component_id, user_id, actions, edit_time, component_type) VALUES ($1, $2, $3, $4, $5)"
+		_, err = p.DB.Exec(context.Background(), sql, componentId, userId, actions, time.Now().Unix(), componentType)
 
-		sql := "UPDATE remonttiv2.permissions SET actions=$1, edit_time=$2 WHERE component_id=$3 AND user_id=$4"
-		_, err = p.DB.Exec(context.Background(), sql, actions, time.Now().Unix(), componentId, userId)
 		if err != nil {
+			print("ERRORR")
 			return nil, err
 		}
-		return permission, nil
-
+		print("RETURN OK")
+		return p.GetPermissionsByComponentIdAndUserId(componentId, userId, componentType)
 	} else {
-
-		sql := "INSERT INTO remonttiv2.permissions (component_id, user_id, actions, edit_time) VALUES ($1, $2, $3, $4)"
-		_, err = p.DB.Exec(context.Background(), sql, componentId, userId, actions, time.Now().Unix())
-
-		if err != nil {
-			return nil, err
-		}
-		return p.GetPermissionsByComponentIdAndUserId(componentId, userId)
-
+		print("RETURN ERROR NIL")
+		// TODO:: вернуть ошибку о том что запить уже существует
+		return nil, err
 	}
+}
 
+func (p *PermissionModel) Update(componentId, userId, actions int, componentType string) (*Permissions, error) {
+	//TODO:: доделать
+	permission, err := p.GetPermissionsByComponentIdAndUserId(componentId, userId, componentType)
+
+	print("UPDATE")
+	sql := "UPDATE remonttiv2.permissions SET actions=$1, edit_time=$2 WHERE component_id=$3 AND user_id=$4"
+	_, err = p.DB.Exec(context.Background(), sql, actions, time.Now().Unix(), componentId, userId)
+	if err != nil {
+		return nil, err
+	}
+	return permission, nil
 }
 
 func (p *PermissionModel) GetGroupByName(groupName string) (*Group, error) {
@@ -214,6 +222,78 @@ func (p *PermissionModel) AddGroupForUser(userId int, groupName string) error {
 	return nil
 }
 
+func (p *PermissionModel) GetGroupsByUserId(userId int) ([]int, error) {
+	return nil, nil
+}
+
 func (p *PermissionModel) AddGroupForUser1(id int, s string) error {
 	return nil
+}
+
+func (p *PermissionModel) GetPermissionIdByComponentIdAndType(componentId int, componentType string) (int, error) {
+	sql := `SELECT * FROM remonttiv2.permissions WHERE component_id = $1 AND component_type=$2`
+
+	row := p.DB.QueryRow(context.Background(), sql, componentId, componentType)
+
+	permissions, err := permissionsRowProcessing(row)
+	if err != nil {
+		return 0, err
+	}
+
+	return permissions.PermissionId, nil
+}
+
+func (p *PermissionModel) IsUserHasPermissions(userId int, componentId int, componentType string, actions int) bool {
+
+	var userService = userservice.UserModel{DB: p.DB}
+	userGroups, err := userService.GetUserGroups(userId)
+
+	if err != nil {
+		return false
+	}
+
+	var batch = &pgx.Batch{}
+
+	for _, item := range userGroups {
+		sql := `SELECT * FROM remonttiv2.group_permissions WHERE group_id = $1 AND component_id = $2 AND component_type = $3 AND (actions & $4) = $4`
+
+		batch.Queue(sql, item.GroupId, componentId, componentType, actions)
+	}
+
+	result := p.DB.SendBatch(context.Background(), batch)
+	defer result.Close()
+
+	res, err := result.Query()
+	for err == nil {
+		if res.Scan() != nil {
+			return true
+		}
+		res, err = result.Query()
+
+	}
+
+	sql := `SELECT * FROM remonttiv2.permissions WHERE user_id = $1 AND component_id=$2 AND component_type = $3 AND  (actions & $4) = $4`
+
+	row := p.DB.QueryRow(context.Background(), sql, userId, componentId, componentType, actions)
+
+	_, err = permissionsRowProcessing(row)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (p *PermissionModel) IsUserHasPermissions1(userId int, permissionsId int, actions int) bool {
+
+	sql := `SELECT * FROM remonttiv2.permissions WHERE user_id = $1 AND permission_id=$2 AND (actions & $3) = $3`
+
+	row := p.DB.QueryRow(context.Background(), sql, userId, permissionsId, actions)
+
+	_, err := permissionsRowProcessing(row)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

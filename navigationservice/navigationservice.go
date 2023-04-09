@@ -38,6 +38,8 @@ func New(db *pgxpool.Pool) *NavigationModel {
 	}
 }
 
+const componentType = "navigation"
+
 func rowProcessing(row pgx.Row) (*NavigationItem, error) {
 
 	var navigation = &NavigationItem{}
@@ -94,9 +96,10 @@ func (n *NavigationModel) GetAllForUser(userId int) ([]*NavigationItem, error) {
 			WHERE 
 				remonttiv2.navigation.id = remonttiv2.permissions.component_id AND
 				(remonttiv2.permissions.actions & $1) = $1 AND
-				remonttiv2.permissions.user_id = $2;`
+				remonttiv2.permissions.user_id = $2 AND 
+				remonttiv2.permissions.component_type = $3 ;`
 
-	rows, err := n.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW, userId)
+	rows, err := n.DB.Query(context.Background(), sql, permissionservice.Actions.VIEW, userId, componentType)
 	if err != nil {
 		return nil, err
 	}

@@ -18,6 +18,10 @@
         v-show="addCompanyModalToggle"
         v-bind:translate="translations"
         v-bind:closeAction="closeAddCompanyModal"/>
+    <EditCompanyModal
+      v-show="editCompanyModalToggle"
+      v-bind:translate="translations"
+      v-bind:closeAction="closeEditCompanyModal"/>
   </div>
   <ErrorMessagePopupBlock :id="'error-popup-block'"/>
 </template>
@@ -29,6 +33,7 @@ import CompanyItem from "./CompanyItem.vue";
 import AddButton from "./AddButton.vue";
 import AddCompanyModal from "./AddCompanyModal.vue";
 import ErrorMessagePopupBlock from "./ErrorMessagePopupBlock.vue";
+import EditCompanyModal from "./EditCompanyModal.vue";
 
 export default {
   name: "Companies",
@@ -36,18 +41,20 @@ export default {
     AddCompanyModal,
     CompanyItem,
     AddButton,
-    ErrorMessagePopupBlock
+    ErrorMessagePopupBlock,
+    EditCompanyModal
   },
   data() {
     return {
       translations: {},
       companies: {},
       addCompanyModalToggle: false,
+      editCompanyModalToggle: false
     }
   },
-  async beforeCreate() {
-    this.companies = (await requests.get("/api/v1/companies/get")).data
-    this.translations = (await requests.get("/api/v1/translations/get?pages=companies")).data
+  async created() {
+    await this.fetchCompanies()
+    await this.fetchCompaniesTranslations()
   },
   methods: {
     getTranslate(label) {
@@ -58,7 +65,19 @@ export default {
     },
     closeAddCompanyModal() {
       this.addCompanyModalToggle = false;
-    }
+    },
+    async fetchCompanies() {
+      this.companies = (await requests.get("/api/v1/companies/get")).data;
+    },
+    async fetchCompaniesTranslations() {
+      this.translations = (await requests.get("/api/v1/translations/get?pages=companies")).data;
+    },
+    closeEditCompanyModal(){
+      this.editCompanyModalToggle = false
+    },
+    showEditCompanyModal() {
+      this.editCompanyModalToggle = true;
+    },
   },
 }
 </script>

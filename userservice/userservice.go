@@ -21,6 +21,11 @@ type User struct {
 	LastLoginErrorDate int
 }
 
+type UserGroups struct {
+	UserId  int
+	GroupId int
+}
+
 type UserModel struct {
 	DB          *pgxpool.Pool
 	CookieStore *sessions.CookieStore
@@ -38,8 +43,8 @@ func (u *UserModel) GetCurrentUserId(r *http.Request, secret string) (int, error
 	return session.Values["userid"].(int), nil
 }
 
-// Возвращает пользователя по его userName и companyId
-// если пользователь не существует возвращает ошибку ErrNoRows
+// GetByNameAndCompanyId Возвращает пользователя по его userName и companyId
+// если пользователь не существует, то возвращает ошибку ErrNoRows
 func (u *UserModel) GetByNameAndCompanyId(userName string, companyId int) (*User, error) {
 	sql := `SELECT * 
 			FROM 
@@ -57,7 +62,7 @@ func (u *UserModel) GetByNameAndCompanyId(userName string, companyId int) (*User
 	return user, nil
 }
 
-// Создает нового пользователя с данными
+// Create Создает нового пользователя с данными
 // userName, password и companyId.
 // Если пользователь существует, то
 // возвращает ошибку ErrUserAlreadyExists и пользователя
@@ -123,6 +128,33 @@ func rowsProcessing(rows pgx.Rows) ([]*User, error) {
 
 		result = append(result, item)
 
+	}
+
+	return result, nil
+}
+
+func (u *UserModel) GetUserGroups(userId int) ([]*UserGroups, error) {
+
+	sql := `SELECT * FROM remonttiv2.users_groups WHERE user_id = $1;`
+
+	rows, err := u.DB.Query(context.Background(), sql, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var result []*UserGroups
+
+	for rows.Next() {
+		var item = &UserGroups{}
+		err := rows.Scan(&item.UserId, &item.GroupId)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+
+		result = append(result, item)
 	}
 
 	return result, nil

@@ -15,13 +15,13 @@
     <InputModal
         v-bind:value="companyAdminName"
         @changed="updateCompanyAdminNameValue"
-        :placeholder="getTranslations('CompanyAdminName')" />
+        :placeholder="getTranslations('CompanyAdminName')"/>
 
     <InputModal
         v-bind:value="companyAdminPassword"
         v-bind:type="'password'"
         @changed="updateCompanyPasswordValue"
-        :placeholder="getTranslations('CompanyAdminPassword')" />
+        :placeholder="getTranslations('CompanyAdminPassword')"/>
 
     <ActionButton18 :title="getTranslations('AddCompany')" class="modal-horizontal-center-button" :action="addCompany"/>
   </div>
@@ -33,16 +33,17 @@ import ActionButton18 from "./ActionButton18.vue";
 import InputModal from "./InputModal.vue";
 import {getTranslations} from "../../scripts/translations.js";
 import {post} from "../../scripts/requests.js";
-import {compile, createApp, createVNode, render} from "vue";
 import {createErrorBlock} from "../../scripts/errors.js";
+import {createSuccessBlock} from "../../scripts/success.js";
+import Companies from "./Companies.vue";
 
 export default {
   data() {
     return {
       companyName: "",
       companyHost: "",
-      companyAdminName:"",
-      companyAdminPassword:""
+      companyAdminName: "",
+      companyAdminPassword: ""
     }
   },
   name: "AddCompanyModal",
@@ -52,32 +53,29 @@ export default {
     getTranslations(label) {
       return getTranslations(this.translate, label)
     },
-    async addCompany(event) {
-
+    addCompany: async function (event) {
       const companyData = {
         'company_name': this.companyName,
         'company_host': this.companyHost,
         'admin_name': this.companyAdminName,
-        'admin_password':this.companyAdminPassword
+        'admin_password': this.companyAdminPassword
       }
 
       let response = await post("/api/v1/companies/add", companyData)
 
-      console.log(response)
-
       if (response.error == null) {
         if (response.data.status === "error") {
           this.errorMessage = response.data.message
-          console.log("ddasdasd")
         } else {
-          console.log("ok")
+          document
+              .getElementById('error-popup-block')
+              .append(createSuccessBlock("Готово!", "Новая компания добавлена"))
+          this.$parent.fetchCompanies();
         }
       } else {
-        console.log(response)
         document
             .getElementById('error-popup-block')
             .append(createErrorBlock("Ошибка", "В ходе выполнения запроса произошла ошибка, попробуйте еще раз"))
-
       }
     },
     updateCompanyNameValue(value) {

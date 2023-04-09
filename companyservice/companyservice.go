@@ -21,6 +21,8 @@ type Company struct {
 	EditTime    int
 }
 
+const ComponentType = "company"
+
 func rowsProcessing(rows pgx.Rows) ([]*Company, error) {
 	var result []*Company
 
@@ -57,6 +59,16 @@ func (c *CompanyModel) GetCompanyByName(companyName string) (*Company, error) {
 	sql := `SELECT * FROM remonttiv2.companies WHERE company_name=$1;`
 
 	row := c.DB.QueryRow(context.Background(), sql, companyName)
+
+	return rowProcessing(row)
+
+}
+
+func (c *CompanyModel) GetCompanyById(companyId int) (*Company, error) {
+
+	sql := `SELECT * FROM remonttiv2.companies WHERE company_id=$1;`
+
+	row := c.DB.QueryRow(context.Background(), sql, companyId)
 
 	return rowProcessing(row)
 
@@ -103,6 +115,32 @@ func (c *CompanyModel) Add(name, host string) (*Company, error) {
 	return rowProcessing(row)
 }
 
+// Delete удаляет компанию, а также запись в таблице пермишенов, с появлением таблицы групповых разрешений необходимо дополнить функцию
+func (c *CompanyModel) Delete(companyId int) (*Company, error) {
+
+	company, err := c.GetCompanyById(companyId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	sql := "DELETE FROM remonttiv2.companies WHERE company_id = $1"
+
+	_, err = c.DB.Exec(context.Background(), sql, companyId)
+	if err != nil {
+		return nil, err
+	}
+
+	sql = "DELETE FROM remonttiv2.permissions WHERE component_id = $1 AND component_type = $2"
+
+	_, err = c.DB.Exec(context.Background(), sql, companyId, ComponentType)
+	if err != nil {
+		return nil, err
+	}
+
+	return company, nil
+}
+
 func (c *CompanyModel) GetAllForUser(userId int) ([]*Company, error) {
 
 	sql := `SELECT 
@@ -110,8 +148,9 @@ func (c *CompanyModel) GetAllForUser(userId int) ([]*Company, error) {
     			remonttiv2.companies.host_name, remonttiv2.companies.edit_time 
 			FROM 
 			    remonttiv2.companies, remonttiv2.permissions 
-			WHERE 
+			WHERE
 			    remonttiv2.companies.company_id = remonttiv2.permissions.component_id AND
+				remonttiv2.permissions.component_type = 'company' AND
 			    (remonttiv2.permissions.actions & $1) = $1 AND
 			    remonttiv2.permissions.user_id = $2;`
 

@@ -142,10 +142,7 @@ func (pg *DatabaseModel) insertGroupData() error {
 
 	allGroups, err := permissionService.GetAllGroups()
 
-	sqlInsert := `INSERT INTO remonttiv2.groups
-				(group_name)
-				VALUES 
-				($1)`
+	sqlInsert := `INSERT INTO remonttiv2.groups (group_name) VALUES ($1)`
 	for _, groupData := range groupData {
 
 		groupExist := false

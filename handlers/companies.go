@@ -36,6 +36,10 @@ type addCompanyForm struct {
 	AdminPassword string `json:"admin_password"`
 }
 
+type deleteCompanyForm struct {
+	CompanyId int `json:"company_id"`
+}
+
 type CompaniesResult struct {
 	CompanyName string `json:"company"`
 	HostName    string `json:"host"`
@@ -206,6 +210,26 @@ func (hm *HandlersModel) addCompaniesApi(w http.ResponseWriter, r *http.Request)
 	permissionService := permissionservice.PermissionModel{DB: hm.DB}
 	err = permissionService.AddGroupForUser(user.Id, "Company admin")
 
+	userId, err := userService.GetCurrentUserId(r, hm.Config.SESSIONS_SECRET)
+	_, err = permissionService.Set(
+		company.CompanyId,
+		userId,
+		permissionservice.Actions.VIEW|permissionservice.Actions.EDIT|permissionservice.Actions.DELETE,
+		"company",
+	)
+
+	print(userId)
+
+	//TODO::добавить ошибку с пермишенами
+	if err != nil {
+		log.Printf("Internal server error: %s", err)
+		json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: pageData.Translation["Internal server error"],
+			Errors:  []string{"Internal server error"}})
+		return
+	}
+
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		err := json.NewEncoder(w).Encode(response{
@@ -229,6 +253,92 @@ func (hm *HandlersModel) addCompaniesApi(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+func (hm *HandlersModel) deleteCompaniesApi(w http.ResponseWriter, r *http.Request) {
+	log := hm.Logger
+	log.Info("Add companies")
+
+	var userService = userservice.UserModel{DB: hm.DB, CookieStore: hm.CookieStore}
+	var permissionService = permissionservice.PermissionModel{DB: hm.DB}
+	var companyService = companyservice.CompanyModel{DB: hm.DB}
+
+	var form *deleteCompanyForm
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		err := json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: pageData.Translation["ErrorTryAgain"],
+			Errors:  []string{"Internal server error"}})
+
+		log.Error("Не удалось декодировать запрос")
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+		}
+	}
+
+	userId, err := userService.GetCurrentUserId(r, hm.Config.SESSIONS_SECRET)
+
+	if err != nil {
+		err := json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: pageData.Translation["ErrorTryAgain"],
+			Errors:  []string{"Internal server error"}})
+
+		log.Error("Не удалось декодировать запрос")
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+		}
+	}
+
+	userHasDeletePermissions := permissionService.IsUserHasPermissions(
+		userId,
+		form.CompanyId,
+		companyservice.ComponentType,
+		permissionservice.Actions.DELETE,
+	)
+
+	var company *companyservice.Company
+
+	if userHasDeletePermissions {
+		company, err = companyService.Delete(form.CompanyId)
+	} else {
+		err := json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: "Недостаточно прав",
+			Errors:  []string{"Internal server error"}})
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if err != nil {
+		// TODO: Вынести подобного рода ответы в отдельный пакет или хотя бы файл
+		err := json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: pageData.Translation["ErrorTryAgain"],
+			Errors:  []string{"Internal server error"}})
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	}
+
+	result := CompaniesResult{
+		company.CompanyName,
+		company.HostName,
+		company.CompanyId,
+	}
+
+	json.NewEncoder(w).Encode(result)
+
+}
+
 func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request) {
 	log := hm.Logger
 	log.Info("Get companies")
@@ -246,7 +356,7 @@ func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request)
 	// если оставляет так, то методы в JS надо снабдить умением выкидывать сообщения об ошибках
 	// в какую-нибудь всплывашку
 	if err != nil {
-		// TODO: Вынести подобного рода обработчики в отдельный пакет или хотя бы файл
+		// TODO: Вынести подобного рода ответы в отдельный пакет или хотя бы файл
 		err := json.NewEncoder(w).Encode(response{
 			Status:  "error",
 			Message: pageData.Translation["ErrorTryAgain"],
@@ -259,7 +369,7 @@ func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request)
 	}
 
 	companies, err := companiesService.GetAllForUser(userId)
-
+	print(len(companies))
 	result := make([]*CompaniesResult, 0)
 	for _, item := range companies {
 		result = append(

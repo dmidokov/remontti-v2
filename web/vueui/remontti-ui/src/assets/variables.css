@@ -12,6 +12,8 @@
 
     --error-popup-block-background: rgba(255, 0, 0, 0.15);
     --error-popup-block-color: #c54444;
+    --success-popup-block-background: rgba(8, 255, 0, 0.15);
+    --success-popup-block-color: #4dc544;
 
 
     --modal-border: rgba(0, 0, 0, 0.2);

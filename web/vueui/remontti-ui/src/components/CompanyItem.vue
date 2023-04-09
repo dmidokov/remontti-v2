@@ -18,6 +18,9 @@
 import IconDropdown from "./IconDropdown.vue";
 import {computed} from "vue";
 import {getTranslations} from "../../scripts/translations.js";
+import {post} from "../../scripts/requests.js";
+import {createSuccessBlock} from "../../scripts/success.js";
+import {createErrorBlock} from "../../scripts/errors.js";
 
 export default {
   name: "CompanyItem",
@@ -44,9 +47,35 @@ export default {
   },
   methods: {
     editCompany(event) {
+      this.$parent.showEditCompanyModal()
       console.log("EDIT COMPANY:: ", event.target.getAttribute("data-id"))
     },
-    deleteCompany(event) {
+    async deleteCompany(event) {
+
+      const companyData = {
+        'company_id': Number(event.target.getAttribute("data-id")),
+      }
+
+      let response = await post("/api/v1/companies/delete", companyData)
+
+      if (response.error == null) {
+        if (response.data.status === "error") {
+          this.errorMessage = response.data.message
+          document
+              .getElementById('error-popup-block')
+              .append(createErrorBlock("Ошибка", response.data.message))
+        } else {
+          document
+              .getElementById('error-popup-block')
+              .append(createSuccessBlock("Готово!", "Компания удалена"))
+          this.$parent.fetchCompanies()
+        }
+      } else {
+        document
+            .getElementById('error-popup-block')
+            .append(createErrorBlock("Ошибка", "В ходе выполнения запроса произошла ошибка, попробуйте еще раз"))
+      }
+
       console.log("DELETE COMPANY:: ", event.target.getAttribute("data-id"))
     }
   }
