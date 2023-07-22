@@ -27,30 +27,9 @@ var pageData = loginPageData{
 	Navigation:  make(map[string]navigationData),
 }
 
-// Страница логина
-func (hm *HandlersModel) login(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		hm.loginPOST(w, r)
-	} else {
-		// TODO: проверить используется ли этот кусок?
-		if hm.Config.MODE == "dev" {
-			if r.Method == "OPTIONS" {
-				setCorsHeaders(&w, r)
-				return
-			}
-		} else {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		}
-	}
-}
-
-func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 	var log = hm.Logger
-
-	if hm.Config.MODE == "dev" {
-		setCorsHeaders(&w, r)
-	}
 
 	host := r.Host
 
@@ -73,7 +52,7 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		log.Warning("Не удалось декодировать JSON: %s", err)
+		log.Warning("Не удалось декодировать JSON: ", err.Error())
 		err := json.NewEncoder(w).Encode(response{
 			Status:  "error",
 			Message: pageData.Translation["InvalidData"],
@@ -183,6 +162,7 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Error("Не удалось кодировать JSON: %s", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
 			}
 			println("login.......................")
 			http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -205,7 +185,7 @@ func (hm *HandlersModel) loginPOST(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (hm *HandlersModel) logout(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) logout(w http.ResponseWriter, r *http.Request) {
 
 	var log = hm.Logger
 

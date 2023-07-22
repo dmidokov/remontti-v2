@@ -1,6 +1,6 @@
 <script setup>
 import Header from '../src/components/Header.vue'
-import Companies from "../src/components/Companies.vue";
+import CompaniesContainer from "../src/components/CompaniesContainer.vue";
 </script>
 <script>
 
@@ -14,15 +14,15 @@ export default {
     }
   },
   async beforeCreate() {
-    this.translations = (await requests.get("/api/v1/translations/get?pages=companies")).data
+    this.translations = (await requests.get("/api/v1/translations/companies")).data
   }
 }
 
 </script>
 
 <template>
-  <Header v-bind:translations="translations"/>
-  <Companies/>
+  <Header/>
+  <CompaniesContainer/>
 </template>
 
 <style scoped>

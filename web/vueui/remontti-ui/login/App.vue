@@ -14,7 +14,7 @@ export default {
     }
   },
   async beforeCreate() {
-    this.translations = (await requests.get("/api/v1/translations/get?pages=loginpage")).data
+    this.translations = (await requests.get("/api/v1/translations/loginpage")).data
   },
   methods: {
     async auth(loginField, passwordField) {

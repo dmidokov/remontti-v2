@@ -36,7 +36,7 @@ import ErrorMessagePopupBlock from "./ErrorMessagePopupBlock.vue";
 import EditCompanyModal from "./EditCompanyModal.vue";
 
 export default {
-  name: "Companies",
+  name: "CompaniesContainer",
   components: {
     AddCompanyModal,
     CompanyItem,
@@ -67,10 +67,10 @@ export default {
       this.addCompanyModalToggle = false;
     },
     async fetchCompanies() {
-      this.companies = (await requests.get("/api/v1/companies/get")).data;
+      this.companies = (await requests.get("/api/v1/companies")).data;
     },
     async fetchCompaniesTranslations() {
-      this.translations = (await requests.get("/api/v1/translations/get?pages=companies")).data;
+      this.translations = (await requests.get("/api/v1/translations/companies")).data;
     },
     closeEditCompanyModal(){
       this.editCompanyModalToggle = false

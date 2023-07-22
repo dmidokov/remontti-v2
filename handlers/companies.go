@@ -2,32 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/dmidokov/remontti-v2/companyservice"
 	"github.com/dmidokov/remontti-v2/permissionservice"
 	"github.com/dmidokov/remontti-v2/userservice"
 	"net/http"
-	"strings"
-	"text/template"
-
-	"github.com/dmidokov/remontti-v2/companyservice"
 )
-
-type companiesData struct {
-	ID   int
-	Host string
-	Name string
-}
-
-type companiesPageData struct {
-	Title       string
-	Translation map[string]string
-	Companies   []companiesData
-	Navigation  map[string]navigationData
-}
-
-type newCompanyForm struct {
-	Name string `json:"name"`
-	Host string `json:"host"`
-}
 
 type addCompanyForm struct {
 	Name          string `json:"company_name"`
@@ -40,113 +19,7 @@ type deleteCompanyForm struct {
 	CompanyId int `json:"company_id"`
 }
 
-func (hm *HandlersModel) companies(w http.ResponseWriter, r *http.Request) {
-
-	var rootPath = hm.Config.ROOT_PATH + "/web/ui/"
-	log := hm.Logger
-
-	files := []string{
-		rootPath + "companies.page.gohtml",
-		rootPath + "base.layout.gohtml",
-		rootPath + "footers/footer.partial.gohtml",
-		rootPath + "headers/mainpage.partial.gohtml",
-		rootPath + "bodies/companies.partial.gohtml",
-		rootPath + "navigations/topnavigation.partial.gohtml",
-		rootPath + "heads/companies.partial.gohtml",
-	}
-
-	var pageData = companiesPageData{
-		Title:       "",
-		Translation: make(map[string]string),
-		Companies:   make([]companiesData, 0),
-		Navigation:  map[string]navigationData{},
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	pageData.Translation, err = hm.getTranslations("mainpage", "navigation", "companies")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-
-	sessionsData, err := hm.getSessionData(r)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-
-	pageData.Navigation, err = hm.getUserNavigation(sessionsData.UserId, pageData.Translation)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-
-	companies, err := hm.getCompanies()
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-	pageData.Companies = *companies
-
-	err = ts.Execute(w, pageData)
-	if err != nil {
-		log.Print(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func (hm *HandlersModel) addCompany(w http.ResponseWriter, r *http.Request) {
-
-	var companyForm *newCompanyForm
-	err := json.NewDecoder(r.Body).Decode(&companyForm)
-	log := hm.Logger
-
-	if err != nil {
-		log.Printf("Invalid data: %s", err)
-		json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: pageData.Translation["InvalidData"],
-			Errors:  []string{"Invalid data"}})
-		return
-	}
-
-	if (len(companyForm.Name) < 2) || (len(strings.Split(companyForm.Host, ".")) != 3) {
-		log.Printf("Invalid data:")
-		json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: pageData.Translation["InvalidData"],
-			Errors:  []string{"Invalid data"}})
-		return
-	}
-
-	var companyService = companyservice.CompanyModel{DB: hm.DB}
-	_, err = companyService.Add(companyForm.Name, companyForm.Host)
-
-	if err != nil {
-		log.Printf("Internal server error: %s", err)
-		json.NewEncoder(w).Encode(response{
-			Status:  "error",
-			Message: pageData.Translation["Internal server error"],
-			Errors:  []string{"Internal server error"}})
-		return
-	}
-
-	json.NewEncoder(w).Encode(response{
-		Status: "ok",
-		Errors: []string{},
-	})
-
-}
-
-func (hm *HandlersModel) addCompaniesApi(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) addCompany(w http.ResponseWriter, r *http.Request) {
 	log := hm.Logger
 	log.Info("Add companies")
 
@@ -247,7 +120,7 @@ func (hm *HandlersModel) addCompaniesApi(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (hm *HandlersModel) deleteCompaniesApi(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) deleteCompany(w http.ResponseWriter, r *http.Request) {
 	log := hm.Logger
 	log.Info("Add companies")
 
@@ -333,7 +206,36 @@ func (hm *HandlersModel) deleteCompaniesApi(w http.ResponseWriter, r *http.Reque
 
 }
 
-func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) getCurrentCompanyName(w http.ResponseWriter, r *http.Request) {
+	log := hm.Logger
+	log.Info("Get current company name")
+
+	var companiesService = companyservice.CompanyModel{DB: hm.DB}
+	var userService = userservice.UserModel{DB: hm.DB, CookieStore: hm.CookieStore}
+
+	userId, err := userService.GetCurrentUserId(r, hm.Config.SESSIONS_SECRET)
+
+	if err != nil {
+		// TODO: Вынести подобного рода ответы в отдельный пакет или хотя бы файл
+		err := json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: pageData.Translation["ErrorTryAgain"],
+			Errors:  []string{"Internal server error"}})
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: ", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	result := companiesService.GetUserCompanyName(userId)
+	json.NewEncoder(w).Encode(result)
+
+}
+
+func (hm *Model) getCompanies(w http.ResponseWriter, r *http.Request) {
 	log := hm.Logger
 	log.Info("Get companies")
 
@@ -362,15 +264,7 @@ func (hm *HandlersModel) getCompaniesApi(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	act := r.URL.Query().Get("act")
-
-	switch act {
-	case "getCurrentCompanyName":
-		result := companiesService.GetUserCompanyName(userId)
-		json.NewEncoder(w).Encode(result)
-	default:
-		result, _ := companiesService.GetAllForUser(userId)
-		json.NewEncoder(w).Encode(result)
-	}
+	result, _ := companiesService.GetAllForUser(userId)
+	json.NewEncoder(w).Encode(result)
 
 }

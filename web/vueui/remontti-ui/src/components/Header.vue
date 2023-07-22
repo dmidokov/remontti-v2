@@ -8,9 +8,6 @@ import * as requests from "../../scripts/requests.js";
 export default {
   name: "Header",
   components: {RightHeader, CenterHeader, LeftHeader},
-  props: {
-    // translations: Object
-  },
   data() {
     return {
       translations: {},
@@ -18,8 +15,8 @@ export default {
     }
   },
   async beforeCreate() {
-    this.navigation = (await requests.get("/api/v1/navigation/get")).data
-    this.translations = (await requests.get("/api/v1/translations/get?pages=navigation")).data
+    this.navigation = (await requests.get("/api/v1/navigation")).data
+    this.translations = (await requests.get("/api/v1/translations/navigation")).data
   }
 }
 </script>

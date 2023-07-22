@@ -15,7 +15,7 @@ export default {
     }
   },
   async beforeCreate() {
-    this.companyName = (await requests.get("/api/v1/companies/get?act=getCurrentCompanyName")).data
+    this.companyName = (await requests.get("/api/v1/companies/getCurrentCompanyName")).data
   }
 }
 </script>

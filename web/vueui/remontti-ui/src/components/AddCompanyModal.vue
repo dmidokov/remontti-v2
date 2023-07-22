@@ -32,10 +32,9 @@ import ActionButton24 from "./ActionButton24.vue";
 import ActionButton18 from "./ActionButton18.vue";
 import InputModal from "./InputModal.vue";
 import {getTranslations} from "../../scripts/translations.js";
-import {post} from "../../scripts/requests.js";
+import {post, put} from "../../scripts/requests.js";
 import {createErrorBlock} from "../../scripts/errors.js";
 import {createSuccessBlock} from "../../scripts/success.js";
-import Companies from "./Companies.vue";
 
 export default {
   data() {
@@ -61,12 +60,14 @@ export default {
         'admin_password': this.companyAdminPassword
       }
 
-      let response = await post("/api/v1/companies/add", companyData)
+      // TODO: поддержать на беке этот запрос, сейчас только post, get
+      let response = await put("/api/v1/companies", companyData)
 
       if (response.error == null) {
         if (response.data.status === "error") {
           this.errorMessage = response.data.message
         } else {
+          // TODO:: поменять строки на лейблы
           document
               .getElementById('error-popup-block')
               .append(createSuccessBlock("Готово!", "Новая компания добавлена"))

@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/dmidokov/remontti-v2/translationservice"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
 
-func (hm *HandlersModel) getTranslationsApi(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) getTranslationsApi(w http.ResponseWriter, r *http.Request) {
 
 	log := hm.Logger
 
@@ -19,12 +20,13 @@ func (hm *HandlersModel) getTranslationsApi(w http.ResponseWriter, r *http.Reque
 		}
 		setCorsHeaders(&w, r)
 	}
-
-	pages := r.URL.Query().Get("pages")
+	vars := mux.Vars(r)
 
 	log.WithFields(logrus.Fields{
-		"pages": pages,
+		"pages": vars["pages"],
 	}).Info("Get translations")
+
+	pages := vars["pages"]
 
 	if pages == "" {
 		json.NewEncoder(w).Encode(response{

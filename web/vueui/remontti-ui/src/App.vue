@@ -16,14 +16,14 @@ export default {
     }
   },
   async beforeCreate() {
-    this.translations = (await requests.get("/api/v1/translations/get?pages=mainpage")).data
+    this.translations = (await requests.get("/api/v1/translations/mainpage")).data
   }
 }
 
 </script>
 
 <template>
-  <Header v-bind:translations="translations"/>
+  <Header/>
 </template>
 
 <style scoped>

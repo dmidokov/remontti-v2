@@ -132,10 +132,15 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) TranslationsList {
 		&translationservice.Translation{Name: "companies", Label: "CompanyAdminPassword", Ru: "Пароль администратора", En: ""},
 	}
 
+	var permissionsPage = TranslationsList{
+		&translationservice.Translation{Name: "permissions", Label: "PermissionsPageHeader", Ru: "Управление правами", En: ""},
+	}
+
 	result = append(result, loginPage...)
 	result = append(result, mainPage...)
 	result = append(result, navigationPage...)
 	result = append(result, companiesPage...)
+	result = append(result, permissionsPage...)
 
 	return result
 }

@@ -12,7 +12,7 @@ type NavigationResult struct {
 	Label string `json:"label"`
 }
 
-func (hm *HandlersModel) getNavigationApi(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) getNavigationApi(w http.ResponseWriter, r *http.Request) {
 	var log = hm.Logger
 
 	if hm.Config.MODE == "dev" {

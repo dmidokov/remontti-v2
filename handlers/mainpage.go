@@ -13,7 +13,7 @@ type mainPageData struct {
 }
 
 // Функция обработчик для главной страницы
-func (hm *HandlersModel) mainPage(w http.ResponseWriter, r *http.Request) {
+func (hm *Model) mainPage(w http.ResponseWriter, r *http.Request) {
 
 	var rootPath = hm.Config.ROOT_PATH + "/web/ui/"
 

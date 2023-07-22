@@ -40,7 +40,7 @@ const addCompanyModal = Vue.createApp({
                 document.getElementById("company-host").classList.add("wrong-field")
             }
 
-            let response = await fetchPostRequestWithJsonBody("/companies/add", company)
+            let response = await fetchPostRequestWithJsonBody("/companies", company)
 
             if (response.error == null) {
                 if (response.data.status == "error") {

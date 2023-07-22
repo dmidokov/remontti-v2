@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/dmidokov/remontti-v2/companyservice"
 	"github.com/dmidokov/remontti-v2/navigationservice"
 	"github.com/dmidokov/remontti-v2/translationservice"
 )
@@ -14,7 +13,7 @@ type SessionData struct {
 	CompanyId int
 }
 
-func (hm *HandlersModel) getUserNavigation(userId int, translation map[string]string) (map[string]navigationData, error) {
+func (hm *Model) getUserNavigation(userId int, translation map[string]string) (map[string]navigationData, error) {
 
 	var navigation = navigationservice.NavigationModel{DB: hm.DB}
 
@@ -35,7 +34,7 @@ func (hm *HandlersModel) getUserNavigation(userId int, translation map[string]st
 	return labels, nil
 }
 
-func (hm *HandlersModel) getSessionData(r *http.Request) (*SessionData, error) {
+func (hm *Model) getSessionData(r *http.Request) (*SessionData, error) {
 	session, _ := hm.CookieStore.Get(r, hm.Config.SESSIONS_SECRET)
 
 	userId, exist := session.Values["userid"].(int)
@@ -53,7 +52,7 @@ func (hm *HandlersModel) getSessionData(r *http.Request) (*SessionData, error) {
 
 }
 
-func (hm *HandlersModel) getTranslations(pagenames ...string) (map[string]string, error) {
+func (hm *Model) getTranslations(pagenames ...string) (map[string]string, error) {
 
 	var translation = translationservice.TranslationsModel{DB: hm.DB}
 
@@ -72,20 +71,20 @@ func (hm *HandlersModel) getTranslations(pagenames ...string) (map[string]string
 	return result, nil
 }
 
-func (hm *HandlersModel) getCompanies() (*[]companiesData, error) {
-
-	var companyservice = companyservice.CompanyModel{DB: hm.DB}
-
-	companies, err := companyservice.GetAll()
-	if err != nil {
-		return nil, err
-	}
-
-	var result = make([]companiesData, 0)
-
-	for _, company := range companies {
-		result = append(result, companiesData{Name: company.CompanyName, Host: company.HostName, ID: company.CompanyId})
-	}
-
-	return &result, nil
-}
+//func (hm *HandlersModel) getCompanies() (*[]companiesData, error) {
+//
+//	var companyservice = companyservice.CompanyModel{DB: hm.DB}
+//
+//	companies, err := companyservice.GetAll()
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var result = make([]companiesData, 0)
+//
+//	for _, company := range companies {
+//		result = append(result, companiesData{Name: company.CompanyName, Host: company.HostName, ID: company.CompanyId})
+//	}
+//
+//	return &result, nil
+//}

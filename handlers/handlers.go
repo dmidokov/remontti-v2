@@ -14,7 +14,7 @@ import (
 // Переменная уровня пакета, используется для
 // передачи конфигурации в функции обработчики
 
-type HandlersModel struct {
+type Model struct {
 	DB          *pgxpool.Pool
 	Config      *config.Configuration
 	CookieStore *sessions.CookieStore
@@ -27,8 +27,8 @@ type response struct {
 	Message string   `json:"message" `
 }
 
-func New(db *pgxpool.Pool, cfg *config.Configuration, cookieStore *sessions.CookieStore, log *logrus.Logger) *HandlersModel {
-	return &HandlersModel{
+func New(db *pgxpool.Pool, cfg *config.Configuration, cookieStore *sessions.CookieStore, log *logrus.Logger) *Model {
+	return &Model{
 		DB:          db,
 		Config:      cfg,
 		CookieStore: cookieStore,
@@ -38,7 +38,7 @@ func New(db *pgxpool.Pool, cfg *config.Configuration, cookieStore *sessions.Cook
 
 // Router Возвращает *mux.Router, c handlerFunction
 // А также файловые сервер для выдачи статики css/js/jpg/...
-func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
+func (hm *Model) Router(corsEnable bool) (*mux.Router, error) {
 
 	router := mux.NewRouter()
 
@@ -66,11 +66,13 @@ func (hm *HandlersModel) Router(corsEnable bool) (*mux.Router, error) {
 	// /api/v1/navigation
 	// /api/v1/companies/
 	// и внутри разбирать запросы или даже на уровне версии апи
-	router.HandleFunc("/api/v1/translations/get", hm.getTranslationsApi).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/navigation/get", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/companies/get", hm.auth(hm.getCompaniesApi)).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/companies/add", hm.auth(hm.addCompaniesApi)).Methods(http.MethodPost)
-	router.HandleFunc("/api/v1/companies/delete", hm.auth(hm.deleteCompaniesApi)).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/translations/{pages}", hm.getTranslationsApi).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/navigation", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/v1/companies", hm.auth(hm.getCompanies)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/companies/getCurrentCompanyName", hm.auth(hm.getCurrentCompanyName)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/companies", hm.auth(hm.addCompany)).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/companies/delete", hm.auth(hm.deleteCompany)).Methods(http.MethodPost)
 
 	return router, nil
 }
@@ -84,6 +86,10 @@ func handleFileServer(dir, prefix string) http.HandlerFunc {
 	fs := http.FileServer(http.Dir(dir))
 	realHandler := http.StripPrefix(prefix, fs).ServeHTTP
 	return func(w http.ResponseWriter, req *http.Request) {
+		if req.Method == http.MethodOptions {
+			setCorsHeaders(&w, req)
+			return
+		}
 		realHandler(w, req)
 	}
 }
