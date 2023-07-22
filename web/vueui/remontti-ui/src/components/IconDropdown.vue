@@ -34,7 +34,7 @@ export default {
     },
     dropdownClose(event) {
 
-      if (event.type === "keyup" && event.key !== 'Escape') {
+      if (event != undefined && event.type === "keyup" && event.key !== 'Escape') {
         return
       }
 
