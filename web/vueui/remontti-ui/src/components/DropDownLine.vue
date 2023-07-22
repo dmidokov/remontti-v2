@@ -12,6 +12,7 @@ export default {
   methods: {
     handler(event) {
       this.action(event)
+      this.$parent.$parent.dropdownClose()
     }
   }
 }
