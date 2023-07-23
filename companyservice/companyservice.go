@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/dmidokov/remontti-v2/permissionservice"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/sirupsen/logrus"
 	"log"
 	"time"
 
@@ -11,7 +12,8 @@ import (
 )
 
 type CompanyModel struct {
-	DB *pgxpool.Pool
+	DB     *pgxpool.Pool
+	Logger *logrus.Logger
 }
 
 type Company struct {
@@ -97,7 +99,7 @@ func (c *CompanyModel) Add(name, host string) (*Company, error) {
 		return nil, err
 	}
 
-	row := c.DB.QueryRow(context.Background(), selectCompanyByNameHostTime, name, host, time)
+	row := c.DB.QueryRow(context.Background(), getCompanyByNameHostTime, name, host, time)
 
 	return rowProcessing(row)
 }
@@ -158,4 +160,16 @@ func (c *CompanyModel) GetUserCompanyName(userId int) string {
 	}
 
 	return result.CompanyName
+}
+
+func (c *CompanyModel) Update(id int, name, host string) (*Company, error) {
+
+	_, err := c.DB.Exec(context.Background(), updateCompany, name, host, id)
+	if err != nil {
+		return nil, err
+	}
+
+	row := c.DB.QueryRow(context.Background(), getCompanyById, id)
+
+	return rowProcessing(row)
 }

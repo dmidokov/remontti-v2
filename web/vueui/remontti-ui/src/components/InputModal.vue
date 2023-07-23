@@ -14,7 +14,7 @@ export default {
   props: ['placeholder', 'value', 'type'],
   data() {
     return {
-      type: this.type? this.type : "text"
+      type: this.type? this.type : "text",
     }
   }
 }

@@ -90,3 +90,35 @@ export async function put(link, data) {
         }
     }
 }
+
+/**
+ * @param {String} link The URI
+ * @param {Object} data The json request body
+ */
+export async function del(link, data) {
+
+    if (import.meta.env.DEV) {
+        link = BASE_URL + link
+    }
+
+    let response = await fetch(link, {
+        method: 'DELETE', headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        }, body: JSON.stringify(data)
+    });
+    if (response.ok) {
+        return {
+            "data": await response.json(), "error": null
+        }
+    } else {
+        return {
+            "data": null,
+            'error': {
+                "statusText": response.statusText,
+                "error": response.error,
+                "status": response.status,
+                "data": await response.json()
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="handler">
+    <button @click="handler" v-bind:data-id="dataid">
       {{ title }}
     </button>
   </div>
@@ -9,7 +9,7 @@
 <script>
 export default {
   name: "ActionButton18",
-  props: ['action', 'title'],
+  props: ['action', 'title', 'dataid'],
   methods: {
     handler(event) {
       this.action(event)

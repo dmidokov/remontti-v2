@@ -12,18 +12,8 @@
         @changed="updateCompanyHostValue"
         :placeholder="getTranslations('CompanyHost')"/>
 
-    <InputModal
-        v-bind:value="companyAdminName"
-        @changed="updateCompanyAdminNameValue"
-        :placeholder="getTranslations('CompanyAdminName')"/>
-
-    <InputModal
-        v-bind:value="companyAdminPassword"
-        v-bind:type="'password'"
-        @changed="updateCompanyPasswordValue"
-        :placeholder="getTranslations('CompanyAdminPassword')"/>
-
-    <ActionButton18 :title="getTranslations('AddCompany')" class="modal-horizontal-center-button" :action="addCompany"/>
+    <ActionButton18 :title="getTranslations('UpdateCompany')" class="modal-horizontal-center-button"
+                    :action="updateCompany" :dataid="companyId"/>
 
   </div>
 
@@ -39,6 +29,7 @@ import ActionButton24 from "./ActionButton24.vue";
 import ActionButton18 from "./ActionButton18.vue";
 import InputModal from "./InputModal.vue";
 import Companies from "./CompaniesContainer.vue";
+import {computed} from "vue";
 
 export default {
   data() {
@@ -46,25 +37,40 @@ export default {
       companyName: "",
       companyHost: "",
       companyAdminName: "",
-      companyAdminPassword: ""
+      companyAdminPassword: "",
+      companyId: ""
     }
+  },
+  computed: {
+    companyName: function () {
+      let value = Object.hasOwn(this.companyData, 'CompanyName') ? this.companyData.CompanyName : ''
+      this.companyName = value
+      return value
+    },
+    companyHost: function () {
+      let value = Object.hasOwn(this.companyData, 'HostName') ? this.companyData.HostName : ''
+      this.companyHost = value
+      return value
+    },
+    companyId: function () {
+      return Object.hasOwn(this.companyData, 'CompanyId') ? this.companyData.CompanyId : ''
+    },
+
   },
   name: "EditCompanyModal",
   components: {InputModal, ActionButton18, ActionButton24},
-  props: ['translate', 'closeAction'],
+  props: ['translate', 'closeAction', 'companyData'],
   methods: {
     getTranslations(label) {
       return getTranslations(this.translate, label)
     },
-    addCompany: async function (event) {
+    updateCompany: async function (event) {
       const companyData = {
         'company_name': this.companyName,
         'company_host': this.companyHost,
-        'admin_name': this.companyAdminName,
-        'admin_password': this.companyAdminPassword
       }
 
-      let response = await post("/api/v1/companies", companyData)
+      let response = await post("/api/v1/companies/" + event.target.getAttribute('data-id'), companyData)
 
       if (response.error == null) {
         if (response.data.status === "error") {
@@ -72,7 +78,7 @@ export default {
         } else {
           document
               .getElementById('error-popup-block')
-              .append(createSuccessBlock("Готово!", "Новая компания добавлена"))
+              .append(createSuccessBlock("Готово!", "Данные компании обновлены"))
           this.$parent.fetchCompanies();
         }
       } else {

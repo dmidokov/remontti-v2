@@ -10,7 +10,9 @@ const getCompanyByHostName = `SELECT * FROM remonttiv2.companies WHERE host_name
 
 const insertCompany = "INSERT INTO remonttiv2.companies (company_name, host_name, edit_time) VALUES($1, $2, $3)"
 
-const selectCompanyByNameHostTime = "SELECT * FROM remonttiv2.companies WHERE company_name=$1 AND host_name=$2 AND edit_time=$3"
+const updateCompany = "UPDATE remonttiv2.companies SET company_name = $1, host_name = $2 WHERE company_id = $3"
+
+const getCompanyByNameHostTime = "SELECT * FROM remonttiv2.companies WHERE company_name=$1 AND host_name=$2 AND edit_time=$3"
 
 const deleteByCompanyId = "DELETE FROM remonttiv2.companies WHERE company_id = $1"
 

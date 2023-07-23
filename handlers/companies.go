@@ -5,7 +5,9 @@ import (
 	"github.com/dmidokov/remontti-v2/companyservice"
 	"github.com/dmidokov/remontti-v2/permissionservice"
 	"github.com/dmidokov/remontti-v2/userservice"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type addCompanyForm struct {
@@ -17,6 +19,11 @@ type addCompanyForm struct {
 
 type deleteCompanyForm struct {
 	CompanyId int `json:"company_id"`
+}
+
+type updateCompanyForm struct {
+	Name string `json:"company_name"`
+	Host string `json:"company_host"`
 }
 
 func (hm *Model) addCompany(w http.ResponseWriter, r *http.Request) {
@@ -265,6 +272,73 @@ func (hm *Model) getCompanies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, _ := companiesService.GetAllForUser(userId)
+	json.NewEncoder(w).Encode(result)
+
+}
+
+func (hm *Model) getCompanyById(w http.ResponseWriter, r *http.Request) {
+	log := hm.Logger
+	log.Info("Get company by id")
+
+	vars := mux.Vars(r)
+
+	//TODO: handle an convertation error
+	companyId, _ := strconv.Atoi(vars["id"])
+
+	var companiesService = companyservice.CompanyModel{DB: hm.DB}
+
+	result, _ := companiesService.GetCompanyById(companyId)
+	json.NewEncoder(w).Encode(result)
+
+}
+
+func (hm *Model) updateCompany(w http.ResponseWriter, r *http.Request) {
+	log := hm.Logger
+	log.Info("Update company")
+
+	vars := mux.Vars(r)
+
+	//TODO: handle an convertation error
+	companyId, _ := strconv.Atoi(vars["id"])
+
+	var companiesService = companyservice.CompanyModel{DB: hm.DB}
+
+	result, err := companiesService.GetCompanyById(companyId)
+
+	if err != nil {
+		// TODO: Вынести подобного рода ответы в отдельный пакет или хотя бы файл
+		err := json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Message: pageData.Translation["ErrorTryAgain"],
+			Errors:  []string{"Internal server error"}})
+
+		if err != nil {
+			log.Error("Не удалось кодировать JSON: %s", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	}
+
+	var form *updateCompanyForm
+	err = json.NewDecoder(r.Body).Decode(&form)
+
+	if result.CompanyName != form.Name || result.HostName != form.Host {
+		updatedCompany, err := companiesService.Update(companyId, form.Name, form.Host)
+		if err != nil {
+			log.Error(err.Error())
+			// TODO: Вынести подобного рода ответы в отдельный пакет или хотя бы файл
+			err := json.NewEncoder(w).Encode(response{
+				Status:  "error",
+				Message: pageData.Translation["ErrorTryAgain"] + err.Error(),
+				Errors:  []string{"Internal server error"}})
+
+			if err != nil {
+				log.Error("Не удалось кодировать JSON: %s", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+		}
+		json.NewEncoder(w).Encode(updatedCompany)
+		return
+	}
 	json.NewEncoder(w).Encode(result)
 
 }

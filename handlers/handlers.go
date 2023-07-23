@@ -70,9 +70,11 @@ func (hm *Model) Router(corsEnable bool) (*mux.Router, error) {
 	router.HandleFunc("/api/v1/navigation", hm.auth(hm.getNavigationApi)).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/v1/companies", hm.auth(hm.getCompanies)).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/companies/{id}", hm.auth(hm.updateCompany)).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/companies/id/{id}", hm.auth(hm.getCompanyById)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/companies/getCurrentCompanyName", hm.auth(hm.getCurrentCompanyName)).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/companies", hm.auth(hm.addCompany)).Methods(http.MethodPost)
-	router.HandleFunc("/api/v1/companies/delete", hm.auth(hm.deleteCompany)).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/companies/delete", hm.auth(hm.deleteCompany)).Methods(http.MethodDelete)
 
 	return router, nil
 }

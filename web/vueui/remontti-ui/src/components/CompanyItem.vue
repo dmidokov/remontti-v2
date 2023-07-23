@@ -18,7 +18,7 @@
 import IconDropdown from "./IconDropdown.vue";
 import {computed} from "vue";
 import {getTranslations} from "../../scripts/translations.js";
-import {post} from "../../scripts/requests.js";
+import {del} from "../../scripts/requests.js";
 import {createSuccessBlock} from "../../scripts/success.js";
 import {createErrorBlock} from "../../scripts/errors.js";
 
@@ -47,16 +47,15 @@ export default {
   },
   methods: {
     editCompany(event) {
-      this.$parent.showEditCompanyModal()
+      this.$parent.showEditCompanyModal(event.target.getAttribute("data-id"))
       console.log("EDIT COMPANY:: ", event.target.getAttribute("data-id"))
     },
     async deleteCompany(event) {
-
       const companyData = {
         'company_id': Number(event.target.getAttribute("data-id")),
       }
 
-      let response = await post("/api/v1/companies/delete", companyData)
+      let response = await del("/api/v1/companies/delete", companyData)
 
       if (response.error == null) {
         if (response.data.status === "error") {
