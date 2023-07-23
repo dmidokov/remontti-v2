@@ -124,8 +124,8 @@ func GetTranslationsDataToInsert(cfg *config.Configuration) TranslationsList {
 		&translationservice.Translation{Name: "companies", Label: "EditCompany", Ru: "Редактировать", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "DeleteCompany", Ru: "Удалить", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyTableTitle", Ru: "Компании", En: ""},
-		&translationservice.Translation{Name: "companies", Label: "Add" +
-			"Company", Ru: "Добавить", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "AddCompany", Ru: "Добавить", En: ""},
+		&translationservice.Translation{Name: "companies", Label: "UpdateCompany", Ru: "Обновить", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyName", Ru: "Название", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyHost", Ru: "Хост", En: ""},
 		&translationservice.Translation{Name: "companies", Label: "CompanyAdminName", Ru: "Логин администратора", En: ""},

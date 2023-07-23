@@ -19,9 +19,10 @@
         v-bind:translate="translations"
         v-bind:closeAction="closeAddCompanyModal"/>
     <EditCompanyModal
-      v-show="editCompanyModalToggle"
-      v-bind:translate="translations"
-      v-bind:closeAction="closeEditCompanyModal"/>
+        v-show="editCompanyModalToggle"
+        v-bind:translate="translations"
+        v-bind:closeAction="closeEditCompanyModal"
+        v-bind:companyData="editCompanyData"/>
   </div>
   <ErrorMessagePopupBlock :id="'error-popup-block'"/>
 </template>
@@ -49,7 +50,8 @@ export default {
       translations: {},
       companies: {},
       addCompanyModalToggle: false,
-      editCompanyModalToggle: false
+      editCompanyModalToggle: false,
+      editCompanyData: {}
     }
   },
   async created() {
@@ -72,10 +74,12 @@ export default {
     async fetchCompaniesTranslations() {
       this.translations = (await requests.get("/api/v1/translations/companies")).data;
     },
-    closeEditCompanyModal(){
+    closeEditCompanyModal() {
       this.editCompanyModalToggle = false
     },
-    showEditCompanyModal() {
+    async showEditCompanyModal(companyId) {
+      this.editCompanyData = (await requests.get("/api/v1/companies/id/" + companyId)).data;
+      console.log(this.editCompanyData);
       this.editCompanyModalToggle = true;
     },
   },
